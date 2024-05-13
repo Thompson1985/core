@@ -59,7 +59,8 @@ pub fn blit(
 
 /// Create a new String from byte sequence.
 pub fn to_string(self : Bytes) -> String {
-  let buf = Buffer::make(self.length() * 4 + 2)
+  // the length of the result string is at most bytes.length() * 4 + 8
+  let buf = Buffer::make(self.length() * 4 + 8)
   buf.write_string("Bytes::[")
   for i = 0; i < self.length(); i = i + 1 {
     if i != 0 {
