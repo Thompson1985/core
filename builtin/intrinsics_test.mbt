@@ -117,11 +117,22 @@ test "uint64 test" {
   inspect!(9223372036854775808UL.lsr(63), content="1")
 }
 
-test "to double" {
+test "from double to" {
   inspect!(10.0.reinterpret_as_i64(), content="4621819117588971520")
   inspect!(10.0.reinterpret_as_u64(), content="4621819117588971520")
   inspect!(20.0.reinterpret_as_i64(), content="4626322717216342016")
   inspect!(20.0.reinterpret_as_u64(), content="4626322717216342016")
+}
+
+test "u64 to double" {
+  inspect!(10UL.to_double(), content="10.0")
+  inspect!(20UL.to_double(), content="20.0")
+  inspect!(0UL.to_double(), content="0.0")
+  // wasm and wasm-gc
+  // inspect!(18446744073709551615UL.to_double(), content="1.8446744073709552e19")
+
+  // js
+  // inspect!(18446744073709551615UL.to_double(), content="-1.0")
 }
 
 test "UInt64::lnot test cases" {

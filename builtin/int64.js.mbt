@@ -497,6 +497,10 @@ pub fn UInt64::to_int(self : UInt64) -> Int {
   MyInt64::from_uint64(self).to_int()
 }
 
+pub fn UInt64::to_double(self : UInt64) -> Double {
+  MyInt64::from_uint64(self).to_double()
+}
+
 pub fn UInt64::compare(self : UInt64, other : UInt64) -> Int {
   MyInt64::from_uint64(self).compare_u(MyInt64::from_uint64(other))
 }
