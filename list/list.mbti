@@ -36,6 +36,8 @@ fn[A, B] filter_map(T[A], (A) -> B?) -> T[B]
 
 fn[A] find(T[A], (A) -> Bool) -> A?
 
+fn[A] find_index(T[A], (A) -> Bool) -> Int?
+
 fn[A] findi(T[A], (A, Int) -> Bool) -> A?
 
 fn[A, B] flat_map(T[A], (A) -> T[B]) -> T[B]
@@ -52,7 +54,7 @@ fn[A] from_iter(Iter[A]) -> T[A]
 
 fn[A] from_iter_rev(Iter[A]) -> T[A]
 
-fn[A : @json.FromJson] from_json(Json) -> T[A]!@json.JsonDecodeError
+fn[A : @json.FromJson] from_json(Json) -> T[A] raise @json.JsonDecodeError
 
 fn[A] head(T[A]) -> A?
 
@@ -102,8 +104,10 @@ fn[A] rev(T[A]) -> T[A]
 
 fn[A] rev_concat(T[A], T[A]) -> T[A]
 
+#deprecated
 fn[A, B] rev_fold(T[A], init~ : B, (B, A) -> B) -> B
 
+#deprecated
 fn[A, B] rev_foldi(T[A], init~ : B, (Int, B, A) -> B) -> B
 
 fn[A, B] rev_map(T[A], (A) -> B) -> T[B]
@@ -161,6 +165,7 @@ fn[A] T::eachi(Self[A], (Int, A) -> Unit) -> Unit
 fn[A] T::filter(Self[A], (A) -> Bool) -> Self[A]
 fn[A, B] T::filter_map(Self[A], (A) -> B?) -> Self[B]
 fn[A] T::find(Self[A], (A) -> Bool) -> A?
+fn[A] T::find_index(Self[A], (A) -> Bool) -> Int?
 fn[A] T::findi(Self[A], (A, Int) -> Bool) -> A?
 fn[A, B] T::flat_map(Self[A], (A) -> Self[B]) -> Self[B]
 fn[A] T::flatten(Self[Self[A]]) -> Self[A]
@@ -187,7 +192,9 @@ fn[A : Eq] T::remove(Self[A], A) -> Self[A]
 fn[A] T::remove_at(Self[A], Int) -> Self[A]
 fn[A] T::rev(Self[A]) -> Self[A]
 fn[A] T::rev_concat(Self[A], Self[A]) -> Self[A]
+#deprecated
 fn[A, B] T::rev_fold(Self[A], init~ : B, (B, A) -> B) -> B
+#deprecated
 fn[A, B] T::rev_foldi(Self[A], init~ : B, (Int, B, A) -> B) -> B
 fn[A, B] T::rev_map(Self[A], (A) -> B) -> Self[B]
 fn[A, E] T::scan_left(Self[A], (E, A) -> E, init~ : E) -> Self[E]

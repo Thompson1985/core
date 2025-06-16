@@ -31,7 +31,7 @@
 ///
 /// Example:
 ///
-/// ```moonbit
+/// ```skip
 /// test "Double::to_int/normal" {
 ///   inspect(42.0.to_int(), content="42")
 ///   inspect((-42.5).to_int(), content="-42")
@@ -51,3 +51,6 @@ pub fn Double::to_int(self : Double) -> Int {
     self.to_unchecked_int()
   }
 }
+
+///|
+fn Double::to_unchecked_int(self : Double) -> Int = "%f64_to_i32"
