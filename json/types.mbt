@@ -13,17 +13,13 @@
 // limitations under the License.
 
 ///|
-#deprecated("Definition of json is moved to builtin package, use `Json` instead")
-pub(all) typealias JsonValue = Json
-
-///|
 pub(all) struct Position {
   line : Int // 1-based
   column : Int // 0-based
 } derive(Eq, ToJson)
 
 ///|
-pub(all) type! ParseError {
+pub(all) suberror ParseError {
   InvalidChar(Position, Char)
   InvalidEof
   InvalidNumber(Position, String)

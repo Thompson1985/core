@@ -18,10 +18,6 @@ pub fn[K : Compare, V] op_set(self : T[K, V], key : K, value : V) -> Unit {
 }
 
 ///|
-#deprecated("Use `get` instead. `op_get` will return `V` instead of `Option[V]` in the future.")
-pub fn[K : Compare, V] op_get(self : T[K, V], key : K) -> V? {
-  self.get(key)
-}
 
 ///|
 pub impl[K : Eq, V : Eq] Eq for T[K, V] with op_equal(self, other) {
@@ -35,12 +31,6 @@ pub fn[K, V] new() -> T[K, V] {
 }
 
 ///|
-#deprecated("Use @sorted_map.from_array instead")
-pub fn[K : Compare, V] of(entries : Array[(K, V)]) -> T[K, V] {
-  let map = { root: None, size: 0 }
-  entries.each(fn(e) { map.add(e.0, e.1) })
-  map
-}
 
 ///| Creates a sorted map from a array of key-value pairs.
 pub fn[K : Compare, V] from_array(entries : Array[(K, V)]) -> T[K, V] {
@@ -123,8 +113,8 @@ pub fn[K, V] clear(self : T[K, V]) -> Unit {
 
 ///|
 /// Iterates the map.
-pub fn[K, V] each(self : T[K, V], f : (K, V) -> Unit) -> Unit {
-  fn dfs(root : Node[K, V]?) -> Unit {
+pub fn[K, V] each(self : T[K, V], f : (K, V) -> Unit raise?) -> Unit raise? {
+  fn dfs(root : Node[K, V]?) -> Unit raise? {
     if root is Some(root) {
       dfs(root.left)
       f(root.key, root.value)
@@ -137,7 +127,10 @@ pub fn[K, V] each(self : T[K, V], f : (K, V) -> Unit) -> Unit {
 
 ///|
 /// Iterates the map with index.
-pub fn[K, V] eachi(self : T[K, V], f : (Int, K, V) -> Unit) -> Unit {
+pub fn[K, V] eachi(
+  self : T[K, V],
+  f : (Int, K, V) -> Unit raise?
+) -> Unit raise? {
   let mut i = 0
   self.each(fn(k, v) {
     f(i, k, v)

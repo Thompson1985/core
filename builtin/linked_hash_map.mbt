@@ -33,14 +33,12 @@ impl[K : Eq, V] Eq for Entry[K, V] with op_equal(self, other) {
 ///
 /// # Example
 ///
-/// ```
-/// test "linked_hash_map_example" {
+/// ```mbt
 ///   let map = { 3: "three", 8 :  "eight", 1 :  "one"}
 ///   assert_eq(map.get(2), None)
 ///   assert_eq(map.get(3), Some("three"))
 ///   map.set(3, "updated")
 ///   assert_eq(map.get(3), Some("updated"))
-/// }
 /// ```
 struct Map[K, V] {
   mut entries : FixedArray[Entry[K, V]?]
@@ -219,11 +217,9 @@ pub fn[K : Hash + Eq, V] Map::op_get(self : Map[K, V], key : K) -> V? {
 /// Example:
 ///
 /// ```moonbit
-/// test "get_or_default" {
 ///   let map = { "a": 1, "b": 2 }
 ///   inspect(map.get_or_default("a", 0), content="1")
 ///   inspect(map.get_or_default("c", 42), content="42")
-/// }
 /// ```
 pub fn[K : Hash + Eq, V] Map::get_or_default(
   self : Map[K, V],
@@ -297,12 +293,10 @@ pub fn[K : Hash + Eq, V] Map::contains(self : Map[K, V], key : K) -> Bool {
 ///
 /// ```moonbit
 /// 
-/// test "Map::contains_kv" {
 ///   let map = { "a": 1, "b": 2 }
 ///   inspect(map.contains_kv("a", 1), content="true")
 ///   inspect(map.contains_kv("a", 2), content="false")
 ///   inspect(map.contains_kv("c", 3), content="false")
-/// }
 /// ```
 pub fn[K : Hash + Eq, V : Eq] Map::contains_kv(
   self : Map[K, V],
@@ -410,32 +404,16 @@ fn calc_grow_threshold(capacity : Int) -> Int {
 // Utils
 
 ///|
-fn[K : Show, V : Show] Map::debug_entries(self : Map[K, V]) -> String {
-  let buf = StringBuilder::new()
-  for i in 0..<self.entries.length() {
-    if i > 0 {
-      buf.write_char(',')
-    }
-    match self.entries[i] {
-      None => buf.write_char('_')
-      Some({ psl, key, value, .. }) =>
-        buf.write_string("(\{psl},\{key},\{value})")
-    }
-  }
-  buf.to_string()
-}
-
-///|
 pub impl[K : Show, V : Show] Show for Map[K, V] with output(self, logger) {
   logger.write_string("{")
-  loop 0, self.head {
-    _, None => logger.write_string("}")
-    i, Some({ key, value, next, .. }) => {
+  loop (0, self.head) {
+    (_, None) => logger.write_string("}")
+    (i, Some({ key, value, next, .. })) => {
       if i > 0 {
         logger.write_string(", ")
       }
       logger..write_object(key)..write_string(": ")..write_object(value)
-      continue i + 1, next
+      continue (i + 1, next)
     }
   }
 }
@@ -461,7 +439,10 @@ pub fn[K, V] Map::is_empty(self : Map[K, V]) -> Bool {
 ///|
 /// Iterate over all key-value pairs of the map in the order of insertion.
 #locals(f)
-pub fn[K, V] Map::each(self : Map[K, V], f : (K, V) -> Unit) -> Unit {
+pub fn[K, V] Map::each(
+  self : Map[K, V],
+  f : (K, V) -> Unit raise?
+) -> Unit raise? {
   loop self.head {
     Some({ key, value, next, .. }) => {
       f(key, value)
@@ -474,13 +455,16 @@ pub fn[K, V] Map::each(self : Map[K, V], f : (K, V) -> Unit) -> Unit {
 ///|
 /// Iterate over all key-value pairs of the map in the order of insertion, with index.
 #locals(f)
-pub fn[K, V] Map::eachi(self : Map[K, V], f : (Int, K, V) -> Unit) -> Unit {
-  loop 0, self.head {
-    i, Some({ key, value, next, .. }) => {
+pub fn[K, V] Map::eachi(
+  self : Map[K, V],
+  f : (Int, K, V) -> Unit raise?
+) -> Unit raise? {
+  loop (0, self.head) {
+    (i, Some({ key, value, next, .. })) => {
       f(i, key, value)
-      continue i + 1, next
+      continue (i + 1, next)
     }
-    _, None => break
+    (_, None) => break
   }
 }
 

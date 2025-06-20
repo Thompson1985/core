@@ -77,22 +77,18 @@ pub fn single_bench(
 }
 
 // NOTE: use a type parameter `Any` to avoid exposing `trait OpaqueValue` to users
+
 ///|
 /// Keep a value to prevent the optimizer from removing 
 /// the calculation that produces it.
 pub fn[Any] keep(self : T, value : Any) -> Unit {
   let trait_object : &OpaqueValue = value
-  self.storage = trait_object
+  self._storage = trait_object
 }
 
 ///|
-/// Suppress field never-read warning
-fn touch_storage(self : T) -> Unit {
-  self.storage |> ignore
-}
-
-///|
-/// Internal use only
+/// Returns a JSON array string containing all collected benchmark summaries.
+/// This helper is mainly used internally for tests and diagnostics.
 #coverage.skip
 pub fn dump_summaries(self : T) -> String {
   "[\{self.buffer.to_string()}]"

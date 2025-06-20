@@ -37,13 +37,6 @@ impl Source for @random_source.ChaCha8 with next(self : @random_source.ChaCha8) 
 ///|
 /// Create a new random number generator with [seed].
 /// @alert unsafe "Panic if seed is not 32 bytes long"
-#deprecated("Use `Rand::new()` instead")
-pub fn new(seed~ : Bytes = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ123456") -> Rand {
-  if seed.length() != 32 {
-    abort("seed must be 32 bytes long")
-  }
-  @random_source.ChaCha8::new(seed) as &Source
-}
 
 ///|
 /// Create a new random number generator with [seed].
@@ -65,7 +58,8 @@ pub fn Rand::new(
 
 ///|
 fn next(self : Rand) -> UInt64 {
-  self._.next()
+  let Rand(s) = self
+  s.next()
 }
 
 ///|
@@ -102,8 +96,8 @@ pub fn int(self : Rand, limit~ : Int = 0) -> Int {
 pub fn int64(self : Rand, limit~ : Int64 = 0) -> Int64 {
   if limit == 0 {
     // range [0, 2^63)
-    // Create a mask that has all bits set to 1 except the highest bit
-    let mask : UInt64 = 1UL << 63
+    // Create a mask that keeps the lower 63 bits
+    let mask : UInt64 = (1UL << 63) - 1UL
     return (self.next() & mask).reinterpret_as_int64()
   } else {
     self.uint64(limit=limit.reinterpret_as_uint64()).reinterpret_as_int64()
@@ -207,11 +201,9 @@ pub fn float(self : Rand) -> Float {
 /// Example:
 ///
 /// ```moonbit
-/// test "Rand::bigint" {
-///   let rand = @random.new()
+///   let rand = Rand::new()
 ///   let n = rand.bigint(8) // Generate random 8-bit number
 ///   inspect(n.bit_length() <= 8, content="true")
-/// }
 /// ```
 pub fn bigint(self : Rand, bits : Int) -> @bigint.BigInt {
   let mod = bits % 8
@@ -301,9 +293,8 @@ test "umul128: handles zero correctly" {
 /// The limit should not be negative.
 ///
 /// # Example
-/// ```
-/// test "shuffle example" {
-///   let r = @random.new()
+/// ```mbt
+///   let r = Rand::new()
 ///   let a = [1, 2, 3, 4, 5]
 ///   r.shuffle(
 ///     a.length(),
@@ -313,7 +304,6 @@ test "umul128: handles zero correctly" {
 ///       a[j] = t
 ///     },
 ///   )
-/// }
 /// ```
 pub fn shuffle(self : Rand, limit : Int, swap : (Int, Int) -> Unit) -> Unit {
   if limit < 0 {
