@@ -42,18 +42,20 @@ pub fn[A] new() -> T[A] {
 ///|
 /// Lookup a value from the hash set
 pub fn[A : Eq + Hash] contains(self : T[A], key : A) -> Bool {
-  loop self, key.hash() {
-    Empty, _ => false
-    Leaf(key1), _ => key == key1
-    Collision(bucket), _ => bucket.find(key)
+  loop (self, key.hash()) {
+    (Empty, _) => false
+    (Leaf(key1), _) => key == key1
+    (Collision(bucket), _) => bucket.find(key)
     // get the first segment (lower 5 bits) of the hash value
     // inline the hot path of Sparse_array::op_get
-    Branch(children), hash => {
+    (Branch(children), hash) => {
       let idx = hash & segment_mask
       if children.elem_info.has(idx) {
         let child = children.data[children.elem_info.index_of(idx)]
-        continue child,
-          (hash.reinterpret_as_uint() >> segment_length).reinterpret_as_int()
+        continue (
+            child,
+            (hash.reinterpret_as_uint() >> segment_length).reinterpret_as_int(),
+          )
       }
       false
     }
@@ -187,8 +189,8 @@ pub fn[K : Eq + Hash] T::union(self : T[K], other : T[K]) -> T[K] {
     (_, Leaf(k)) => self.add(k)
     (Leaf(k), _) => other.add(k)
     (Branch(sa1), Branch(sa2)) =>
-      Branch(sa1.union(sa2, fn(m1, m2) { m1.union(m2) }))
-    (_, _) => self.iter().fold(init=other, fn(m, k) { m.add(k) })
+      Branch(sa1.union(sa2, (m1, m2) => m1.union(m2)))
+    (_, _) => self.iter().fold(init=other, (m, k) => m.add(k))
   }
 }
 
@@ -201,7 +203,7 @@ pub fn[K : Eq + Hash] T::intersection(self : T[K], other : T[K]) -> T[K] {
     (Leaf(k), _) => if other.contains(k) { Leaf(k) } else { Empty }
     (_, Leaf(k)) => if self.contains(k) { Leaf(k) } else { Empty }
     (Branch(sa1), Branch(sa2)) => {
-      let res = sa1.intersection(sa2, fn(m1, m2) { m1.intersection(m2) })
+      let res = sa1.intersection(sa2, (m1, m2) => m1.intersection(m2))
       if res.size() == 0 {
         Empty
       } else {
@@ -211,13 +213,7 @@ pub fn[K : Eq + Hash] T::intersection(self : T[K], other : T[K]) -> T[K] {
     (_, _) =>
       self
       .iter()
-      .fold(init=Empty, fn(m, k) {
-        if other.contains(k) {
-          m.add(k)
-        } else {
-          m
-        }
-      })
+      .fold(init=Empty, (m, k) => if other.contains(k) { m.add(k) } else { m })
   }
 }
 
@@ -232,13 +228,7 @@ pub fn[K : Eq + Hash] T::difference(self : T[K], other : T[K]) -> T[K] {
     (_, _) =>
       self
       .iter()
-      .fold(init=Empty, fn(m, k) {
-        if other.contains(k) {
-          m
-        } else {
-          m.add(k)
-        }
-      })
+      .fold(init=Empty, (m, k) => if other.contains(k) { m } else { m.add(k) })
   }
 }
 
@@ -250,12 +240,12 @@ pub fn[A] is_empty(self : T[A]) -> Bool {
 
 ///|
 /// Iterate through the elements in a hash set
-pub fn[A] each(self : T[A], f : (A) -> Unit) -> Unit {
+pub fn[A] each(self : T[A], f : (A) -> Unit raise?) -> Unit raise? {
   match self {
     Empty => ()
     Leaf(k) => f(k)
     Collision(bucket) => bucket.each(f)
-    Branch(children) => children.each(fn { child => child.each(f) })
+    Branch(children) => children.each(child => child.each(f))
   }
 }
 
@@ -266,13 +256,13 @@ pub fn[A] iter(self : T[A]) -> Iter[A] {
     Empty => Iter::empty()
     Leaf(k) => Iter::singleton(k)
     Collision(bucket) => bucket.iter()
-    Branch(children) => children.data.iter().flat_map(fn { set => set.iter() })
+    Branch(children) => children.data.iter().flat_map(set => set.iter())
   }
 }
 
 ///|
 pub fn[A : Eq + Hash] from_iter(iter : Iter[A]) -> T[A] {
-  iter.fold(init=new(), fn(s, e) { s.add(e) })
+  iter.fold(init=new(), (s, e) => s.add(e))
 }
 
 ///|
@@ -282,29 +272,29 @@ pub impl[A : Show] Show for T[A] with output(self, logger) {
 
 ///|
 pub fn[A : Eq + Hash] from_array(arr : Array[A]) -> T[A] {
-  loop arr.length(), new() {
-    0, set => set
-    n, set => {
+  loop (arr.length(), new()) {
+    (0, set) => set
+    (n, set) => {
       let k = arr[n - 1]
-      continue n - 1, set.add(k)
+      continue (n - 1, set.add(k))
     }
   }
 }
 
 ///|
 pub fn[A : Eq + Hash] of(arr : FixedArray[A]) -> T[A] {
-  loop arr.length(), new() {
-    0, set => set
-    n, set => {
+  loop (arr.length(), new()) {
+    (0, set) => set
+    (n, set) => {
       let k = arr[n - 1]
-      continue n - 1, set.add(k)
+      continue (n - 1, set.add(k))
     }
   }
 }
 
 ///|
 pub impl[A : Hash] Hash for T[A] with hash_combine(self, hasher) {
-  hasher.combine(self.iter().fold(init=0, fn(x, y) { x ^ y.hash() }))
+  hasher.combine(self.iter().fold(init=0, (x, y) => x ^ y.hash()))
 }
 
 ///|
@@ -313,7 +303,7 @@ pub impl[A : Eq] Eq for T[A] with op_equal(self, other) {
     (Empty, Empty) => true
     (Leaf(x), Leaf(y)) => x == y
     (Collision(xs), Collision(ys)) =>
-      xs.size() == ys.size() && xs.iter().all(fn(x) { ys.find(x) })
+      xs.size() == ys.size() && xs.iter().all(x => ys.find(x))
     (Branch(xs), Branch(ys)) => xs == ys
     _ => false
   }

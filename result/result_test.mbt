@@ -22,30 +22,30 @@ test "Result unwrap should return Ok value" {
 ///|
 test "bind with Err" {
   let x : Result[Int, String] = Err("error")
-  let y = x.bind(fn(v : Int) { Ok(v * 7) })
+  let y = x.bind(v => Ok(v * 7))
   assert_eq(y, Err("error"))
 }
 
 ///|
 test "wrap0 with error" {
-  let f = fn() -> Int!Failure { raise Failure("error") }
+  let f : () -> Int raise Failure = () => raise Failure("error")
   let result = try? f()
   inspect(
     result,
     content=
-      #|Err("Failure(error)")
+      #|Err(Failure("error"))
     ,
   )
 }
 
 ///|
 test "wrap2 with error result" {
-  let f = fn(_, _) -> Unit!Failure { raise Failure("error") }
+  let f : (Int, Int) -> Unit raise Failure = (_, _) => raise Failure("error")
   let r = try? f(1, 2)
   inspect(
     r,
     content=
-      #|Err("Failure(error)")
+      #|Err(Failure("error"))
     ,
   )
 }
