@@ -44,7 +44,7 @@ test "Map:: iter2" {
   let map = { "a": 1, "b": 2, "c": 3 }
   let v = map.iter2()
   let mut res = ""
-  v.each(fn(k, v) { res = res + k + v.to_string() })
+  v.each((k, v) => res = res + k + v.to_string())
   inspect(res, content="a1b2c3")
 }
 
@@ -58,4 +58,52 @@ test "map::contains_kv" {
   guard map is { "a": 1, "b": 2, "c": 3, .. } else {
     fail("map is not { \"a\": 1, \"b\": 2, \"c\": 3 }")
   }
+}
+
+///|
+test "Map::map" {
+  let map = { "a": 1, "b": 2, "c": 3 }
+  let v = map.map((k, v) => k + v.to_string())
+  inspect(
+    v,
+    content=
+      #|{"a": "a1", "b": "b2", "c": "c3"}
+    ,
+  )
+  map["d"] = 10
+  map["e"] = 20
+  map.remove("c")
+  let v = map.map((k, v) => k + v.to_string())
+  inspect(
+    v,
+    content=
+      #|{"a": "a1", "b": "b2", "d": "d10", "e": "e20"}
+    ,
+  )
+  let v : Map[String, String] = {}.map((k, v) => k + v)
+  inspect(v, content="{}")
+}
+
+///|
+test "Map::copy" {
+  let map = { "a": 1, "b": 2, "c": 3 }
+  let copy = map.copy()
+  inspect(
+    copy,
+    content=
+      #|{"a": 1, "b": 2, "c": 3}
+    ,
+  )
+  map["d"] = 10
+  map["e"] = 20
+  map.remove("c")
+  let copy = map.copy()
+  inspect(
+    copy,
+    content=
+      #|{"a": 1, "b": 2, "d": 10, "e": 20}
+    ,
+  )
+  let copy : Map[String, String] = {}.copy()
+  inspect(copy, content="{}")
 }

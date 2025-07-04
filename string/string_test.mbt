@@ -83,7 +83,7 @@ test "chars" {
   let mut str = ""
   "A😊𠮷BA😊𠮷B"
   .iter()
-  .each(fn(c) { str = str + c.to_int().to_string() + "\n" })
+  .each(c => str = str + c.to_int().to_string() + "\n")
   inspect(
     str,
     content=
@@ -113,7 +113,7 @@ test "rev_iter" {
   let mut str = ""
   "A😊𠮷BA😊𠮷B"
   .rev_iter()
-  .each(fn(c) { str = str + c.to_int().to_string() + "\n" })
+  .each(c => str = str + c.to_int().to_string() + "\n")
   inspect(
     str,
     content=
@@ -143,7 +143,7 @@ test "iter2" {
   let mut str = ""
   "A😊𠮷BA😊𠮷B"
   .iter2()
-  .each(fn(i, c) { str = str + "\{i}: \{c.to_int()} \n" })
+  .each((i, c) => str = str + "\{i}: \{c.to_int()} \n")
   inspect(
     str,
     content=
@@ -161,6 +161,7 @@ test "iter2" {
 }
 
 // test here to avlid cyclic dependency between assertion and builtin
+
 ///|
 test "Buffer::to_bytes" {
   let buffer = StringBuilder::new(size_hint=16)
@@ -531,7 +532,7 @@ test "split" {
 ///|
 test "String::fold" {
   let s = "this is a long string"
-  inspect(s.fold(init=0, fn(acc, c) { acc + c.to_int() }), content="1980")
+  inspect(s.fold(init=0, (acc, c) => acc + c.to_int()), content="1980")
   inspect(
     s.fold(init=@list.empty(), _.prepend(_)).rev(),
     content="@list.of(['t', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 'l', 'o', 'n', 'g', ' ', 's', 't', 'r', 'i', 'n', 'g'])",
