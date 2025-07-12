@@ -13,16 +13,29 @@
 // limitations under the License.
 
 ///|
-#visibility(change_to="readonly", "Use helper functions like `Json::object(...)` instead")
-pub(all) enum Json {
+pub enum Json {
   Null
   True
   False
-  Number(Double)
+  Number(Double, repr~ : String?) // 1.0000000000000000000e100 
   String(String)
   Array(Array[Json])
   Object(Map[String, Json])
-} derive(Eq)
+}
+
+///|
+pub impl Eq for Json with op_equal(a, b) {
+  match (a, b) {
+    (Null, Null) => true
+    (True, True) => true
+    (False, False) => true
+    (Number(a_num, ..), Number(b_num, ..)) => a_num == b_num
+    (String(a_str), String(b_str)) => a_str == b_str
+    (Array(a_arr), Array(b_arr)) => a_arr == b_arr
+    (Object(a_obj), Object(b_obj)) => a_obj == b_obj
+    _ => false
+  }
+}
 
 ///|
 /// Creates a JSON null value.
@@ -32,9 +45,7 @@ pub(all) enum Json {
 /// Example:
 ///
 /// ```moonbit
-/// test "null" {
 ///   inspect(Json::null(), content="Null")
-/// }
 /// ```
 pub fn Json::null() -> Json {
   return Null
@@ -53,12 +64,14 @@ pub fn Json::null() -> Json {
 /// Example:
 ///
 /// ```moonbit
-/// test "number" {
-///   inspect(Json::number(3.14), content="Number(3.14)")
-/// }
+/// inspect(Json::number(3.14), content="Number(3.14)")
+/// inspect(
+///   Json::number(@double.infinity, repr="1e9999999999999999999999999999999").stringify(), 
+///   content="1e9999999999999999999999999999999"
+/// )
 /// ```
-pub fn Json::number(number : Double) -> Json {
-  return Number(number)
+pub fn Json::number(number : Double, repr? : String) -> Json {
+  return Number(number, repr~)
 }
 
 ///|
@@ -73,9 +86,7 @@ pub fn Json::number(number : Double) -> Json {
 /// Example:
 ///
 /// ```moonbit
-/// test "string" {
 ///   inspect(Json::string("hello"), content="String(\"hello\")")
-/// }
 /// ```
 pub fn Json::string(string : String) -> Json {
   return String(string)
@@ -93,10 +104,8 @@ pub fn Json::string(string : String) -> Json {
 /// Example:
 ///
 /// ```moonbit
-/// test "boolean" {
 ///   inspect(Json::boolean(true), content="True")
 ///   inspect(Json::boolean(false), content="False")
-/// }
 /// ```
 pub fn Json::boolean(boolean : Bool) -> Json {
   if boolean {
@@ -118,13 +127,11 @@ pub fn Json::boolean(boolean : Bool) -> Json {
 /// Example:
 ///
 /// ```moonbit
-/// test "array" {
 ///   let values : Array[Json] = [1.0, "hello"]
 ///   inspect(
 ///     Json::array(values),
 ///     content="Array([Number(1), String(\"hello\")])",
 ///   )
-/// }
 /// ```
 pub fn Json::array(array : Array[Json]) -> Json {
   return Array(array)
@@ -143,13 +150,11 @@ pub fn Json::array(array : Array[Json]) -> Json {
 /// Example:
 ///
 /// ```moonbit
-/// test "object" {
 ///   let map : Map[String, Json] = { "name": "John", "age": 42.0 }
 ///   inspect(
 ///     Json::object(map),
 ///     content="Object({\"name\": String(\"John\"), \"age\": Number(42)})",
 ///   )
-/// }
 /// ```
 pub fn Json::object(object : Map[String, Json]) -> Json {
   return Object(object)
@@ -172,12 +177,12 @@ pub impl ToJson for Bool with to_json(self : Bool) -> Json {
 
 ///|
 pub impl ToJson for Byte with to_json(self : Byte) -> Json {
-  Number(self.to_double())
+  Json::number(self.to_double())
 }
 
 ///|
 pub impl ToJson for Int with to_json(self : Int) -> Json {
-  Number(self.to_double())
+  Json::number(self.to_double())
 }
 
 ///|
@@ -187,7 +192,7 @@ pub impl ToJson for Int64 with to_json(self : Int64) -> Json {
 
 ///|
 pub impl ToJson for UInt with to_json(self : UInt) -> Json {
-  Number(self.to_uint64().to_double())
+  Json::number(self.to_uint64().to_double())
 }
 
 ///|
@@ -202,12 +207,12 @@ pub impl ToJson for Double with to_json(self : Double) -> Json {
     self < 0xFFEFFFFFFFFFFFFFL.reinterpret_as_double() {
     return Null
   }
-  Number(self)
+  Json::number(self)
 }
 
 ///|
 pub impl ToJson for Float with to_json(self : Float) -> Json {
-  Number(self.to_double())
+  Json::number(self.to_double())
 }
 
 ///|

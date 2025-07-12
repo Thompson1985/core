@@ -89,16 +89,16 @@ pub fn String::find_by(self : String, pred : (Char) -> Bool) -> Int? {
 
 ///|
 test "find_by" {
-  inspect("hello".find_by(fn(c) { c == 'o' }), content="Some(4)")
-  inspect("hello".find_by(fn(c) { c == 'l' }), content="Some(2)")
-  inspect("hello".find_by(fn(c) { c == 'z' }), content="None")
-  inspect("".find_by(fn(c) { c == 'a' }), content="None")
-  inspect("hello".find_by(fn(c) { c is ('0'..='9') }), content="None")
-  inspect("hello123".find_by(fn(c) { c is ('0'..='9') }), content="Some(5)")
-  inspect("hello".find_by(fn(c) { c is ('A'..='Z') }), content="None")
-  inspect("Hello".find_by(fn(c) { c is ('A'..='Z') }), content="Some(0)")
-  inspect("αβγ".find_by(fn(c) { c == 'β' }), content="Some(1)")
-  inspect("😀😁😂".find_by(fn(c) { c == '😂' }), content="Some(2)")
+  inspect("hello".find_by(c => c == 'o'), content="Some(4)")
+  inspect("hello".find_by(c => c == 'l'), content="Some(2)")
+  inspect("hello".find_by(c => c == 'z'), content="None")
+  inspect("".find_by(c => c == 'a'), content="None")
+  inspect("hello".find_by(c => c is ('0'..='9')), content="None")
+  inspect("hello123".find_by(c => c is ('0'..='9')), content="Some(5)")
+  inspect("hello".find_by(c => c is ('A'..='Z')), content="None")
+  inspect("Hello".find_by(c => c is ('A'..='Z')), content="Some(0)")
+  inspect("αβγ".find_by(c => c == 'β'), content="Some(1)")
+  inspect("😀😁😂".find_by(c => c == '😂'), content="Some(2)")
 }
 
 ///|
@@ -684,9 +684,9 @@ test "rev" {
 pub fn View::split(self : View, sep : View) -> Iter[View] {
   let sep_len = sep.length()
   if sep_len == 0 {
-    return self.iter().map(fn(c) { c.to_string().view() })
+    return self.iter().map(c => c.to_string().view())
   }
-  Iter::new(fn(yield_) {
+  Iter::new(yield_ => {
     let mut view = self
     while view.find(sep) is Some(end) {
       guard yield_(view.view(end_offset=end)) is IterContinue else {
@@ -799,7 +799,7 @@ pub fn View::replace_all(self : View, old~ : View, new~ : View) -> View {
   let buf = StringBuilder::new(size_hint=len)
   let old_len = old.length()
   let new = new.to_string()
-  // todo: improve performance by providing write_view method to StringBuilder
+  // use write_substring to avoid intermediate allocations
   if old_len == 0 {
     buf.write_string(new)
     for c in self {
@@ -811,13 +811,18 @@ pub fn View::replace_all(self : View, old~ : View, new~ : View) -> View {
     let first_end = self.find(old)
     if first_end is Some(end) {
       for view = self, end = end {
-        buf.write_string(view.view(end_offset=end).to_string())
+        let seg = view.view(end_offset=end)
+        buf.write_substring(seg.data(), seg.start_offset(), seg.length())
         buf.write_string(new)
         // check if there is no more characters after the last occurrence of `old`
         guard end + old_len <= len else { break }
         let next_view = view.view(start_offset=end + old_len)
         guard next_view.find(old) is Some(next_end) else {
-          buf.write_string(next_view.to_string())
+          buf.write_substring(
+            next_view.data(),
+            next_view.start_offset(),
+            next_view.length(),
+          )
           break
         }
         continue next_view, next_end
@@ -840,7 +845,7 @@ pub fn replace_all(self : String, old~ : View, new~ : View) -> String {
   let buf = StringBuilder::new(size_hint=len)
   let old_len = old.length()
   let new = new.to_string()
-  // todo: improve performance
+  // use write_substring to avoid intermediate allocations
   if old_len == 0 {
     buf.write_string(new)
     for c in self {
@@ -852,13 +857,18 @@ pub fn replace_all(self : String, old~ : View, new~ : View) -> String {
     let first_end = self.find(old)
     if first_end is Some(end) {
       for view = self[:], end = end {
-        buf.write_string(view.view(end_offset=end).to_string())
+        let seg = view.view(end_offset=end)
+        buf.write_substring(seg.data(), seg.start_offset(), seg.length())
         buf.write_string(new)
         // check if there is no more characters after the last occurrence of `old`
         guard end + old_len <= len else { break }
         let next_view = view.view(start_offset=end + old_len)
         guard next_view.find(old) is Some(next_end) else {
-          buf.write_string(next_view.to_string())
+          buf.write_substring(
+            next_view.data(),
+            next_view.start_offset(),
+            next_view.length(),
+          )
           break
         }
         continue next_view, next_end
@@ -938,7 +948,8 @@ pub fn View::to_lower(self : View) -> View {
   // TODO: deal with non-ascii characters
   guard self.find_by(_.is_ascii_uppercase()) is Some(idx) else { return self }
   let buf = StringBuilder::new(size_hint=self.length())
-  buf.write_string(self.view(end_offset=idx).to_string())
+  let head = self.view(end_offset=idx)
+  buf.write_substring(head.data(), head.start_offset(), head.length())
   for c in self.view(start_offset=idx) {
     if c.is_ascii_uppercase() {
       // 'A' is 65 in ASCII, 'a' is 97, the difference is 32
@@ -956,7 +967,8 @@ pub fn to_lower(self : String) -> String {
   // TODO: deal with non-ascii characters
   guard self.find_by(_.is_ascii_uppercase()) is Some(idx) else { return self }
   let buf = StringBuilder::new(size_hint=self.length())
-  buf.write_string(self.view(end_offset=idx).to_string())
+  let head = self.view(end_offset=idx)
+  buf.write_substring(head.data(), head.start_offset(), head.length())
   for c in self.view(start_offset=idx) {
     if c.is_ascii_uppercase() {
       // 'A' is 65 in ASCII, 'a' is 97, the difference is 32
@@ -988,7 +1000,8 @@ pub fn View::to_upper(self : View) -> View {
   // TODO: deal with non-ascii characters
   guard self.find_by(_.is_ascii_lowercase()) is Some(idx) else { return self }
   let buf = StringBuilder::new(size_hint=self.length())
-  buf.write_string(self.view(end_offset=idx).to_string())
+  let head = self.view(end_offset=idx)
+  buf.write_substring(head.data(), head.start_offset(), head.length())
   for c in self.view(start_offset=idx) {
     if c.is_ascii_lowercase() {
       buf.write_char((c.to_int() - 32).unsafe_to_char())
@@ -1005,7 +1018,8 @@ pub fn to_upper(self : String) -> String {
   // TODO: deal with non-ascii characters
   guard self.find_by(_.is_ascii_lowercase()) is Some(idx) else { return self }
   let buf = StringBuilder::new(size_hint=self.length())
-  buf.write_string(self.view(end_offset=idx).to_string())
+  let head = self.view(end_offset=idx)
+  buf.write_substring(head.data(), head.start_offset(), head.length())
   for c in self.view(start_offset=idx) {
     if c.is_ascii_lowercase() {
       buf.write_char((c.to_int() - 32).unsafe_to_char())
@@ -1048,14 +1062,14 @@ pub fn[A] fold(self : String, init~ : A, f : (A, Char) -> A) -> A {
 ///|
 test "fold" {
   assert_eq(
-    "hello".fold(init=[], fn(acc, c) {
+    "hello".fold(init=[], (acc, c) => {
       acc.push(c)
       acc
     }),
     ['h', 'e', 'l', 'l', 'o'],
   )
   assert_eq(
-    "hello".fold(init=0, fn(acc, c) { acc + c.to_int() }),
+    "hello".fold(init=0, (acc, c) => acc + c.to_int()),
     104 + 101 + 108 + 108 + 111,
   )
 }
@@ -1077,14 +1091,14 @@ pub fn[A] rev_fold(self : String, init~ : A, f : (A, Char) -> A) -> A {
 ///|
 test "rev_fold" {
   assert_eq(
-    "hello".rev_fold(init=[], fn(acc, c) {
+    "hello".rev_fold(init=[], (acc, c) => {
       acc.push(c)
       acc
     }),
     ['o', 'l', 'l', 'e', 'h'],
   )
   assert_eq(
-    "hello".rev_fold(init=0, fn(acc, c) { acc + c.to_int() }),
+    "hello".rev_fold(init=0, (acc, c) => acc + c.to_int()),
     111 + 108 + 108 + 101 + 104,
   )
 }

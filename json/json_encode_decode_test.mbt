@@ -28,19 +28,19 @@ fn[T] array_to_json(arr : Array[T], f~ : (T) -> Json) -> Json {
 fn to_json(self : AllThree) -> Json {
   let { ints, floats, strings } = self
   {
-    "ints": ints |> array_to_json(f=fn { x => Json::number(x.to_double()) }),
-    "floats": floats |> array_to_json(f=fn { x => Json::number(x) }),
-    "strings": strings |> array_to_json(f=fn { x => Json::string(x) }),
+    "ints": ints |> array_to_json(f=x => Json::number(x.to_double())),
+    "floats": floats |> array_to_json(f=Json::number(_)),
+    "strings": strings |> array_to_json(f=Json::string(_)),
   }
 }
 
 ///|
-type! DecodeError {
+suberror DecodeError {
   DecodeError(String)
 } derive(Eq, Show)
 
 ///|
-fn of_json(jv : Json) -> AllThree!DecodeError {
+fn of_json(jv : Json) -> AllThree raise DecodeError {
   match jv {
     {
       "ints": Array(ints),
@@ -53,13 +53,13 @@ fn of_json(jv : Json) -> AllThree!DecodeError {
       let strings_result = []
       for n in ints {
         match n {
-          Number(n) => ints_result.push(n.to_int())
+          Number(n, ..) => ints_result.push(n.to_int())
           _ => () // error handling here
         }
       }
       for n in floats {
         match n {
-          Number(n) => floats_result.push(n)
+          Number(n, ..) => floats_result.push(n)
           _ => () // error handling here
         }
       }
@@ -85,9 +85,9 @@ test {
   let json = all_three.to_json()
   inspect(
     try? of_json(json),
-    content=
+    content=(
       #|Ok({ints: [1, 2, 3], floats: [1, 2, 3], strings: ["a", "b", "c"]})
-    ,
+    ),
   )
   // FIXME:
   // note try? `body_no_error` is confusing

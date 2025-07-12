@@ -42,9 +42,8 @@ fn iter_count(name? : String, inner : () -> Unit, count : UInt) -> Summary {
   } else {
     target_batch_size.ceil().to_int()
   }
-  let samples = Array::makei(count, fn(_) {
-    iter_n_microseconds(inner, batch_size) / batch_size.to_double()
-  })
+  let samples = Array::makei(count, _ => iter_n_microseconds(inner, batch_size) /
+    batch_size.to_double())
   samples.sort()
   winsorize(sorted_data=samples, 5.0)
   Summary::new(name?, sorted_data=samples, batch_size)
@@ -59,7 +58,7 @@ pub fn bench(
   count~ : UInt = 10
 ) -> Unit {
   let summary = iter_count(name?, f, count)
-  if not(self.buffer.is_empty()) {
+  if !self.buffer.is_empty() {
     self.buffer.write_char(',')
   }
   self.buffer.write_string(summary.to_json().stringify(escape_slash=true))
@@ -77,22 +76,18 @@ pub fn single_bench(
 }
 
 // NOTE: use a type parameter `Any` to avoid exposing `trait OpaqueValue` to users
+
 ///|
 /// Keep a value to prevent the optimizer from removing 
 /// the calculation that produces it.
 pub fn[Any] keep(self : T, value : Any) -> Unit {
   let trait_object : &OpaqueValue = value
-  self.storage = trait_object
+  self._storage = trait_object
 }
 
 ///|
-/// Suppress field never-read warning
-fn touch_storage(self : T) -> Unit {
-  self.storage |> ignore
-}
-
-///|
-/// Internal use only
+/// Returns a JSON array string containing all collected benchmark summaries.
+/// This helper is mainly used internally for tests and diagnostics.
 #coverage.skip
 pub fn dump_summaries(self : T) -> String {
   "[\{self.buffer.to_string()}]"
@@ -101,7 +96,7 @@ pub fn dump_summaries(self : T) -> String {
 ///|
 test "bench - single_bench basic functionality" {
   let bench_result = single_bench(
-    fn() {
+    () => {
       // Simple operation
       let x = 1 + 1
       ignore(x)
@@ -120,7 +115,7 @@ test "bench - single_bench basic functionality" {
 test "bench - Summary struct properties" {
   // Create a very simple bench and extract the summary
   let bench_result = single_bench(
-    fn() {
+    () => {
       // Simple operation
       let x = 1
       ignore(x)
@@ -155,7 +150,7 @@ test "bench - T struct and bench method" {
 
   // Run a benchmark
   bench_obj.bench(
-    fn() {
+    () => {
       // Simple operation
       let x = 20 * 20
       ignore(x)
@@ -169,7 +164,7 @@ test "bench - T struct and bench method" {
 
   // Run another benchmark to ensure we can add multiple
   bench_obj.bench(
-    fn() {
+    () => {
       // Another operation
       let y = 30 * 30
       ignore(y)

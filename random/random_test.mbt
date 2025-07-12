@@ -22,11 +22,15 @@ test "prng" {
   assert_eq(r.double(), 0.3318940049218405)
   assert_eq(r.int(limit=10), 0)
   assert_eq(r.uint(), 311122750)
-  assert_eq(r.int64(), -9223372036854775808)
+  let int64_val = r.int64()
+  inspect(int64_val, content="2043189202271773519")
+  assert_true(int64_val >= 0L)
+  let limit : UInt64 = 1UL << 63
+  assert_true(int64_val.reinterpret_as_uint64() < limit)
   assert_eq(r.int64(limit=10), 8)
   assert_eq(r.uint64(), 3951155890335085418)
   let a = [1, 2, 3, 4, 5]
-  r.shuffle(a.length(), fn(i : Int, j : Int) {
+  r.shuffle(a.length(), (i : Int, j : Int) => {
     let t = a[i]
     a[i] = a[j]
     a[j] = t
@@ -47,7 +51,7 @@ test {
 ///|
 test "panic random with invalid seed length" {
   let short_seed = b"short seed"
-  let _ = @random.chacha8(seed=short_seed)
+  let _ = @random.Rand::chacha8(seed=short_seed)
 
 }
 
@@ -55,7 +59,7 @@ test "panic random with invalid seed length" {
 test "panic negative limit in shuffle" {
   let r = @random.Rand::new()
   let arr = [1, 2, 3]
-  r.shuffle(-1, fn(i : Int, j : Int) {
+  r.shuffle(-1, (i : Int, j : Int) => {
     let t = arr[i]
     arr[i] = arr[j]
     arr[j] = t

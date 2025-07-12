@@ -29,7 +29,7 @@ pub impl[A] Default for T[A] with default() {
 
 ///|
 /// Returns the one-value ImmutableSet containing only `value`.
-pub fn[A : Compare] singleton(value : A) -> T[A] {
+pub fn[A] singleton(value : A) -> T[A] {
   Node(left=Empty, value~, right=Empty, size=1)
 }
 
@@ -45,7 +45,7 @@ pub fn[A : Compare] from_array(array : Array[A]) -> T[A] {
 
 ///|
 /// Convert ImmutableSet[T] to Array[T], the result must be ordered.
-pub fn[A : Compare] to_array(self : T[A]) -> Array[A] {
+pub fn[A] to_array(self : T[A]) -> Array[A] {
   let arr = []
   fn aux(set : T[A]) {
     match set {
@@ -69,8 +69,8 @@ pub fn[A : Compare] to_array(self : T[A]) -> Array[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([3, 4, 5]).remove_min(), @sorted_set.of([4, 5]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([3, 4, 5]).remove_min(), @sorted_set.of([4, 5]))
 /// ```
 pub fn[A : Compare] remove_min(self : T[A]) -> T[A] {
   match self {
@@ -89,8 +89,8 @@ pub fn[A : Compare] remove_min(self : T[A]) -> T[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([6, 3, 8, 1]).add(5), @sorted_set.of([1, 3, 5, 6, 8]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([6, 3, 8, 1]).add(5), @sorted_set.of([1, 3, 5, 6, 8]))
 /// ```
 pub fn[A : Compare] add(self : T[A], value : A) -> T[A] {
   match self {
@@ -123,8 +123,8 @@ pub fn[A : Compare] add(self : T[A], value : A) -> T[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([3, 8, 1]).remove(8), @sorted_set.of([1, 3]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([3, 8, 1]).remove(8), @sorted_set.of([1, 3]))
 /// ```
 pub fn[A : Compare] remove(self : T[A], value : A) -> T[A] {
   match self {
@@ -158,8 +158,8 @@ pub fn[A : Compare] remove(self : T[A], value : A) -> T[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).min(), 1)
+/// ```mbt
+///   assert_eq(@sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).min(), 1)
 /// ```
 pub fn[A : Compare] min(self : T[A]) -> A {
   match self {
@@ -189,8 +189,8 @@ pub fn[A : Compare] min_option(self : T[A]) -> A? {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).max(), 9)
+/// ```mbt
+///   assert_eq(@sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).max(), 9)
 /// ```
 pub fn[A : Compare] max(self : T[A]) -> A {
   match self {
@@ -221,11 +221,11 @@ pub fn[A : Compare] max_option(self : T[A]) -> A? {
 ///
 /// # Example
 ///
-/// ```
-/// let (left, present, right) = @sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).split(5)
-/// assert_eq(present, true)
-/// assert_eq(left, @sorted_set.of([1, 2, 3, 4]))
-/// assert_eq(right, @sorted_set.of([6, 7, 8, 9]))
+/// ```mbt
+///   let (left, present, right) = @sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).split(5)
+///   inspect(present, content="true")
+///   assert_eq(left, @sorted_set.of([1, 2, 3, 4]))
+///   assert_eq(right, @sorted_set.of([6, 7, 8, 9]))
 /// ```
 pub fn[A : Compare] split(self : T[A], divide : A) -> (T[A], Bool, T[A]) {
   match self {
@@ -247,7 +247,7 @@ pub fn[A : Compare] split(self : T[A], divide : A) -> (T[A], Bool, T[A]) {
 
 ///|
 /// Returns true if sorted_set is empty
-pub fn[A : Compare] is_empty(self : T[A]) -> Bool {
+pub fn[A] is_empty(self : T[A]) -> Bool {
   self is Empty
 }
 
@@ -269,8 +269,8 @@ pub fn[A : Compare] contains(self : T[A], value : A) -> Bool {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([3, 4, 5]).union(@sorted_set.of([4, 5, 6])), @sorted_set.of([3, 4, 5, 6]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([3, 4, 5]).union(@sorted_set.of([4, 5, 6])), @sorted_set.of([3, 4, 5, 6]))
 /// ```
 pub fn[A : Compare] union(self : T[A], other : T[A]) -> T[A] {
   match (self, other) {
@@ -300,8 +300,8 @@ pub fn[A : Compare] union(self : T[A], other : T[A]) -> T[A] {
 /// a convenient alias of `union`
 /// # Example
 /// 
-/// ```
-/// assert_eq(@sorted_set.of([3, 4, 5]) + (@sorted_set.of([4, 5, 6])), @sorted_set.of([3, 4, 5, 6]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([3, 4, 5]) + (@sorted_set.of([4, 5, 6])), @sorted_set.of([3, 4, 5, 6]))
 /// ```
 pub impl[A : Compare] Add for T[A] with op_add(self, other) {
   return self.union(other)
@@ -319,8 +319,8 @@ pub fn[A : Compare] inter(self : T[A], other : T[A]) -> T[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([3, 4, 5]).intersection(@sorted_set.of([4, 5, 6])), @sorted_set.of([4, 5]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([3, 4, 5]).intersection(@sorted_set.of([4, 5, 6])), @sorted_set.of([4, 5]))
 /// ```
 pub fn[A : Compare] intersection(self : T[A], other : T[A]) -> T[A] {
   match (self, other) {
@@ -338,10 +338,9 @@ pub fn[A : Compare] intersection(self : T[A], other : T[A]) -> T[A] {
 ///
 /// # Example
 ///
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3]).difference(@sorted_set.of([4, 5, 1])), @sorted_set.of([2, 3]))
 /// ```
-/// assert_eq(@sorted_set.of([1, 2, 3]).difference(@sorted_set.of([4, 5, 1])), @sorted_set.of([2, 3]))
-/// ```
-///
 #deprecated("Use `difference` instead")
 #coverage.skip
 pub fn[A : Compare] diff(self : T[A], other : T[A]) -> T[A] {
@@ -353,8 +352,8 @@ pub fn[A : Compare] diff(self : T[A], other : T[A]) -> T[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([1, 2, 3]).difference(@sorted_set.of([4, 5, 1])), @sorted_set.of([2, 3]))
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3]).difference(@sorted_set.of([4, 5, 1])), @sorted_set.of([2, 3]))
 /// ```
 pub fn[A : Compare] difference(self : T[A], other : T[A]) -> T[A] {
   match (self, other) {
@@ -383,14 +382,12 @@ pub fn[A : Compare] difference(self : T[A], other : T[A]) -> T[A] {
 /// Example:
 ///
 /// ```moonbit
-/// test "symmetric_difference" {
 ///   let set1 = @sorted_set.of([1, 2, 3, 4])
 ///   let set2 = @sorted_set.of([3, 4, 5, 6])
 ///   inspect(
 ///     set1.symmetric_difference(set2),
 ///     content="@immut/sorted_set.of([1, 2, 5, 6])",
 ///   )
-/// }
 /// ```
 pub fn[A : Compare] symmetric_difference(self : T[A], other : T[A]) -> T[A] {
   match (self, other) {
@@ -411,8 +408,8 @@ pub fn[A : Compare] symmetric_difference(self : T[A], other : T[A]) -> T[A] {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([1, 2, 3]).subset(@sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1])), true)
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3]).subset(@sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1])), true)
 /// ```
 pub fn[A : Compare] subset(self : T[A], other : T[A]) -> Bool {
   match (self, other) {
@@ -441,8 +438,8 @@ pub fn[A : Compare] subset(self : T[A], other : T[A]) -> Bool {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq(@sorted_set.of([1, 2, 3]).disjoint(@sorted_set.of([4, 5, 6])), true)
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3]).disjoint(@sorted_set.of([4, 5, 6])), true)
 /// ```
 pub fn[A : Compare] disjoint(self : T[A], other : T[A]) -> Bool {
   match (self, other) {
@@ -464,12 +461,12 @@ pub fn[A : Compare] disjoint(self : T[A], other : T[A]) -> Bool {
 ///
 /// # Example
 ///
+/// ```mbt
+///   let arr = []
+///   @sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).each((x) => { arr.push(x) })
+///   assert_eq(arr, [1, 2, 3, 4, 5, 6, 7, 8, 9])
 /// ```
-/// let arr = []
-/// @sorted_set.of([7, 2, 9, 4, 5, 6, 3, 8, 1]).each(fn(x) { arr.push(x) })
-/// assert_eq(arr, [1, 2, 3, 4, 5, 6, 7, 8, 9])
-/// ```
-pub fn[A] each(self : T[A], f : (A) -> Unit) -> Unit {
+pub fn[A] each(self : T[A], f : (A) -> Unit raise?) -> Unit raise? {
   match self {
     Empty => ()
     Node(left~, value~, right~, ..) => {
@@ -485,10 +482,14 @@ pub fn[A] each(self : T[A], f : (A) -> Unit) -> Unit {
 ///
 /// # Example
 ///
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3, 4, 5]).fold(init=0, (acc, x) => { acc + x }), 15)
 /// ```
-/// assert_eq(@sorted_set.of([1, 2, 3, 4, 5]).fold(init=0, fn(acc, x) { acc + x }), 15)
-/// ```
-pub fn[A : Compare, B] fold(self : T[A], init~ : B, f : (B, A) -> B) -> B {
+pub fn[A : Compare, B] fold(
+  self : T[A],
+  init~ : B,
+  f : (B, A) -> B raise?
+) -> B raise? {
   match self {
     Empty => init
     Node(left~, value~, right~, ..) =>
@@ -501,10 +502,13 @@ pub fn[A : Compare, B] fold(self : T[A], init~ : B, f : (B, A) -> B) -> B {
 ///
 /// # Example
 ///
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3]).map((x) => { x * 2}), @sorted_set.of([2, 4, 6]))
 /// ```
-/// assert_eq(@sorted_set.of([1, 2, 3]).map(fn(x){ x * 2}), @sorted_set.of([2, 4, 6]))
-/// ```
-pub fn[A : Compare, B : Compare] map(self : T[A], f : (A) -> B) -> T[B] {
+pub fn[A : Compare, B : Compare] map(
+  self : T[A],
+  f : (A) -> B raise?
+) -> T[B] raise? {
   match self {
     Empty => Empty
     Node(left~, value~, right~, ..) =>
@@ -517,10 +521,10 @@ pub fn[A : Compare, B : Compare] map(self : T[A], f : (A) -> B) -> T[B] {
 ///
 /// # Example
 ///
+/// ```mbt
+///   assert_eq(@sorted_set.of([2, 4, 6]).all((v) => { v % 2 == 0}), true)
 /// ```
-/// assert_eq(@sorted_set.of([2, 4, 6]).all(fn(v) { v % 2 == 0}), true)
-/// ```
-pub fn[A : Compare] all(self : T[A], f : (A) -> Bool) -> Bool {
+pub fn[A : Compare] all(self : T[A], f : (A) -> Bool raise?) -> Bool raise? {
   match self {
     Empty => true
     Node(left~, value~, right~, ..) => f(value) && left.all(f) && right.all(f)
@@ -532,10 +536,10 @@ pub fn[A : Compare] all(self : T[A], f : (A) -> Bool) -> Bool {
 ///
 /// # Example
 ///
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 4, 3]).any((v) => { v % 2 == 0}), true)
 /// ```
-/// assert_eq(@sorted_set.of([1, 4, 3]).any(fn(v) { v % 2 == 0}), true)
-/// ```
-pub fn[A : Compare] any(self : T[A], f : (A) -> Bool) -> Bool {
+pub fn[A : Compare] any(self : T[A], f : (A) -> Bool raise?) -> Bool raise? {
   match self {
     Empty => false
     Node(left~, value~, right~, ..) => f(value) || left.any(f) || right.any(f)
@@ -547,10 +551,10 @@ pub fn[A : Compare] any(self : T[A], f : (A) -> Bool) -> Bool {
 ///
 /// # Example
 ///
+/// ```mbt
+///   assert_eq(@sorted_set.of([1, 2, 3, 4, 5, 6]).filter((v) => { v % 2 == 0}), @sorted_set.of([2, 4, 6]))
 /// ```
-/// assert_eq(@sorted_set.of([1, 2, 3, 4, 5, 6]).filter(fn(v) { v % 2 == 0}), @sorted_set.of([2, 4, 6]))
-/// ```
-pub fn[A : Compare] filter(self : T[A], f : (A) -> Bool) -> T[A] {
+pub fn[A : Compare] filter(self : T[A], f : (A) -> Bool raise?) -> T[A] raise? {
   match self {
     Empty => Empty
     Node(left~, value~, right~, ..) => {
@@ -580,7 +584,7 @@ pub impl[A : ToJson] ToJson for T[A] with to_json(self) {
   let capacity = self.iter().count()
   guard capacity != 0 else { return Json::array([]) }
   let jsons = Array::new(capacity~)
-  self.each(fn(a) { jsons.push(a.to_json()) })
+  self.each(a => jsons.push(a.to_json()))
   Json::array(jsons)
 }
 
@@ -600,8 +604,8 @@ pub impl[A : @json.FromJson + Compare] @json.FromJson for T[A] with from_json(
     )
   }
   let mut set = new()
-  for i in arr {
-    set = set.add(A::from_json(i, path))
+  for i, x in arr {
+    set = set.add(A::from_json(x, path.add_index(i)))
   }
   set
 }
@@ -609,7 +613,7 @@ pub impl[A : @json.FromJson + Compare] @json.FromJson for T[A] with from_json(
 ///|
 pub fn[A : @json.FromJson + Compare] from_json(
   json : Json
-) -> T[A]!@json.JsonDecodeError {
+) -> T[A] raise @json.JsonDecodeError {
   @json.from_json(json)
 }
 
@@ -634,7 +638,7 @@ priv enum SplitBis[A] {
 }
 
 ///|
-impl[T : Show] Show for SplitBis[T] with output(self, logger) {
+impl[T] Show for SplitBis[T] with output(self, logger) {
   match self {
     Found => logger.write_string("Found")
     NotFound(_) => logger.write_string("NotFound")
@@ -646,7 +650,7 @@ impl[T : Show] Show for SplitBis[T] with output(self, logger) {
 /// The right is computed on demand.
 fn[A : Compare] split_bis(self : T[A], value : A) -> SplitBis[A] {
   match self {
-    Empty => NotFound(Empty, fn() -> T[A] { Empty })
+    Empty => NotFound(Empty, () => Empty)
     Node(left~, value=node_value, right~, ..) => {
       let compare_result = value.compare(node_value)
       if compare_result == 0 {
@@ -654,8 +658,7 @@ fn[A : Compare] split_bis(self : T[A], value : A) -> SplitBis[A] {
       } else if compare_result < 0 {
         match left.split_bis(value) {
           Found => Found
-          NotFound(ll, rl) =>
-            NotFound(ll, fn() -> T[A] { join(rl(), node_value, right) })
+          NotFound(ll, rl) => NotFound(ll, () => join(rl(), node_value, right))
         }
       } else {
         match right.split_bis(value) {
@@ -669,7 +672,7 @@ fn[A : Compare] split_bis(self : T[A], value : A) -> SplitBis[A] {
 
 ///|
 /// Get the height of set.
-pub fn[A : Compare] size(self : T[A]) -> Int {
+pub fn[A] size(self : T[A]) -> Int {
   match self {
     Empty => 0
     Node(size~, ..) => size
@@ -678,13 +681,13 @@ pub fn[A : Compare] size(self : T[A]) -> Int {
 
 ///|
 /// Creates a new node.
-fn[A : Compare] create(left : T[A], value : A, right : T[A]) -> T[A] {
+fn[A] create(left : T[A], value : A, right : T[A]) -> T[A] {
   Node(left~, right~, value~, size=left.size() + right.size() + 1)
 }
 
 ///|
 /// Same as create, but performs one step of rebalancing if necessary.
-fn[A : Compare] balance(left : T[A], value : A, right : T[A]) -> T[A] {
+fn[A] balance(left : T[A], value : A, right : T[A]) -> T[A] {
   let left_size = left.size()
   let right_size = right.size()
   if left_size + right_size < 2 {

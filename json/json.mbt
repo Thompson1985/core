@@ -32,7 +32,7 @@ pub fn as_bool(self : JsonValue) -> Bool? {
 ///|
 /// Try to get this element as a Number
 pub fn as_number(self : JsonValue) -> Double? {
-  guard self is Number(n) else { return None }
+  guard self is Number(n, ..) else { return None }
   Some(n)
 }
 
@@ -146,7 +146,11 @@ pub fn stringify(
         ..write_char('\"')
         .to_string()
       }
-      Number(n) => n.to_string()
+      Number(n, repr~) =>
+        match repr {
+          None => n.to_string()
+          Some(r) => r
+        }
       True => "true"
       False => "false"
       Null => "null"
@@ -210,7 +214,7 @@ pub fn inspect(
   content? : Json,
   loc~ : SourceLoc = _,
   args_loc~ : ArgsLoc = _
-) -> Unit!InspectError {
+) -> Unit raise InspectError {
   let loc = loc.to_string().escape()
   let args_loc = args_loc.to_json().escape()
   let actual = obj.to_json().stringify(escape_slash=false)

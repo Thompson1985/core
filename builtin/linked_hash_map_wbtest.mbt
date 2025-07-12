@@ -17,17 +17,20 @@ type MyString String derive(Eq)
 
 ///|
 impl Hash for MyString with hash(self) {
-  self._.length()
+  let MyString(s) = self
+  s.length()
 }
 
 ///|
 impl Hash for MyString with hash_combine(self, hasher) {
-  hasher.combine_string(self._)
+  let MyString(s) = self
+  hasher.combine_string(s)
 }
 
 ///|
 impl Show for MyString with output(self, logger) {
-  logger.write_string(self._)
+  let MyString(s) = self
+  logger.write_string(s)
 }
 
 ///|
@@ -81,9 +84,9 @@ test "get_or_default" {
 ///|
 test "get_or_init" {
   let m : Map[String, Array[Int]] = Map::new()
-  m.get_or_init("a", fn() { Array::new() }).push(1)
-  m.get_or_init("b", fn() { Array::new() }).push(2)
-  m.get_or_init("a", fn() { Array::new() }).push(3)
+  m.get_or_init("a", () => Array::new()).push(1)
+  m.get_or_init("b", () => Array::new()).push(2)
+  m.get_or_init("a", () => Array::new()).push(3)
   assert_eq(m.get("a"), Some([1, 3]))
   assert_eq(m.get("b"), Some([2]))
 }
@@ -91,9 +94,9 @@ test "get_or_init" {
 ///|
 test "get_or_init" {
   let m : Map[String, Array[Int]] = Map::new()
-  m.get_or_init("a", fn() { Array::new() }).push(1)
-  m.get_or_init("b", fn() { Array::new() }).push(2)
-  m.get_or_init("a", fn() { Array::new() }).push(3)
+  m.get_or_init("a", () => Array::new()).push(1)
+  m.get_or_init("b", () => Array::new()).push(2)
+  m.get_or_init("a", () => Array::new()).push(3)
   assert_eq(m.get("a"), Some([1, 3]))
   assert_eq(m.get("b"), Some([2]))
 }
@@ -167,7 +170,7 @@ test "is_empty" {
 test "iter" {
   let m = { "a": 1, "b": 2, "c": 3 }
   let mut sum = 0
-  m.each(fn(_k, v) { sum += v })
+  m.each((_k, v) => sum += v)
   assert_eq(sum, 6)
 }
 
@@ -176,7 +179,7 @@ test "iteri" {
   let m = { "a": 1, "b": 2, "c": 3 }
   let mut sum = 0
   let mut s = ""
-  m.eachi(fn(i, _k, v) {
+  m.eachi((i, _k, v) => {
     s += i.to_string()
     sum += v
   })
@@ -228,7 +231,7 @@ test "iter" {
   let map = { 1: "one", 2: "two", 3: "three" }
   map
   .iter()
-  .each(fn(e) {
+  .each(e => {
     let (k, v) = e
     buf.write_string("[\{k}-\{v}]")
   })
@@ -237,7 +240,7 @@ test "iter" {
   map
   .iter()
   .take(2)
-  .each(fn(e) {
+  .each(e => {
     let (k, v) = e
     buf.write_string("[\{k}-\{v}]")
   })
@@ -250,7 +253,7 @@ test "iter order" {
   m["three"] = 3
   m["two"] = 2
   let buf = StringBuilder::new(size_hint=0)
-  m.each(fn(k, v) { buf.write_string("[\{k}-\{v}]") })
+  m.each((k, v) => buf.write_string("[\{k}-\{v}]"))
   inspect(buf.to_string(), content="[one-1][three-3][two-2]")
 }
 
@@ -265,44 +268,44 @@ test "linked list" {
   m["five"] = 5
   inspect(
     m,
-    content=
+    content=(
       #|{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
-    ,
+    ),
   )
   m.remove("three")
   inspect(
     m,
-    content=
+    content=(
       #|{"one": 1, "two": 2, "four": 4, "five": 5}
-    ,
+    ),
   )
   m.set("two", 20)
   inspect(
     m,
-    content=
+    content=(
       #|{"one": 1, "two": 20, "four": 4, "five": 5}
-    ,
+    ),
   )
   m.remove("one")
   inspect(
     m,
-    content=
+    content=(
       #|{"two": 20, "four": 4, "five": 5}
-    ,
+    ),
   )
   m.remove("five")
   inspect(
     m,
-    content=
+    content=(
       #|{"two": 20, "four": 4}
-    ,
+    ),
   )
   m.remove("two")
   inspect(
     m,
-    content=
+    content=(
       #|{"four": 4}
-    ,
+    ),
   )
   m.remove("four")
   inspect(m, content="{}")
@@ -313,9 +316,9 @@ test "to_array" {
   let map = { 1: "one", 2: "two", 3: "three" }
   inspect(
     map.to_array(),
-    content=
+    content=(
       #|[(1, "one"), (2, "two"), (3, "three")]
-    ,
+    ),
   )
 }
 
@@ -419,7 +422,7 @@ test "iter" {
   m.set("b", 2)
   m.set("c", 3)
   let mut sum = 0
-  m.each(fn(_k, v) { sum += v })
+  m.each((_k, v) => sum += v)
   assert_eq(sum, 6)
 }
 
@@ -431,7 +434,7 @@ test "iteri" {
   m.set("c", 3)
   let mut sum = 0
   let mut s = ""
-  m.eachi(fn(i, _k, v) {
+  m.eachi((i, _k, v) => {
     s += i.to_string()
     sum += v
   })
@@ -517,7 +520,7 @@ test "iter" {
   m.set("b", 2)
   m.set("c", 3)
   let mut sum = 0
-  m.each(fn(_k, v) { sum += v })
+  m.each((_k, v) => sum += v)
   assert_eq(sum, 6)
 }
 
@@ -529,7 +532,7 @@ test "iteri" {
   m.set("c", 3)
   let mut sum = 0
   let mut s = ""
-  m.eachi(fn(i, _k, v) {
+  m.eachi((i, _k, v) => {
     s += i.to_string()
     sum += v
   })
@@ -653,7 +656,7 @@ test "iter" {
   m.set("b", 2)
   m.set("c", 3)
   let mut sum = 0
-  m.each(fn(_k, v) { sum += v })
+  m.each((_k, v) => sum += v)
   assert_eq(sum, 6)
 }
 
@@ -665,7 +668,7 @@ test "iteri" {
   m.set("c", 3)
   let mut sum = 0
   let mut s = ""
-  m.eachi(fn(i, _k, v) {
+  m.eachi((i, _k, v) => {
     s += i.to_string()
     sum += v
   })
@@ -712,16 +715,16 @@ test "to_string" {
   m.set("c", 3)
   inspect(
     m.to_string(),
-    content=
+    content=(
       #|{"a": 1, "b": 2, "c": 3}
-    ,
+    ),
   )
   let nested_m = { "a": { "b": 2 }, "B": { "C": 3 } }
   inspect(
     nested_m.to_string(),
-    content=
+    content=(
       #|{"a": {"b": 2}, "B": {"C": 3}}
-    ,
+    ),
   )
 }
 
@@ -883,4 +886,25 @@ test "op_equal_key_value_mismatch" {
   map2.set(2, 3)
   // This should return false as the values are different
   assert_eq(map1 == map2, false)
+}
+
+///|
+fn[K : Show, V : Show] Map::debug_entries(self : Map[K, V]) -> String {
+  let buf = StringBuilder::new()
+  for i in 0..<self.entries.length() {
+    if i > 0 {
+      buf.write_char(',')
+    }
+    match self.entries[i] {
+      None => buf.write_char('_')
+      Some({ psl, key, value, .. }) =>
+        buf.write_string("(\{psl},\{key},\{value})")
+    }
+  }
+  buf.to_string()
+}
+
+///|
+impl[K : Eq, V] Eq for Entry[K, V] with op_equal(self, other) {
+  self.hash == other.hash && self.key == other.key
 }

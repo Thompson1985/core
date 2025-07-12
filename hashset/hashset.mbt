@@ -31,24 +31,19 @@ pub fn[K] new(capacity~ : Int = default_init_capacity) -> T[K] {
 /// Create new hash set from array.
 pub fn[K : Hash + Eq] from_array(arr : Array[K]) -> T[K] {
   let m = new()
-  arr.each(fn(e) { m.add(e) })
+  arr.each(e => m.add(e))
   m
 }
 
 ///|
 pub fn[K : Hash + Eq] of(arr : FixedArray[K]) -> T[K] {
   let m = new()
-  arr.each(fn(e) { m.add(e) })
+  arr.each(e => m.add(e))
   m
 }
 
 ///|
 /// Insert a key into hash set.
-#deprecated("Use `add` instead.")
-#coverage.skip
-pub fn[K : Hash + Eq] insert(self : T[K], key : K) -> Unit {
-  self.add(key)
-}
 
 ///|
 /// Insert a key into hash set.
@@ -58,8 +53,8 @@ pub fn[K : Hash + Eq] add(self : T[K], key : K) -> Unit {
   }
   let hash = key.hash()
   let entry = { psl: 0, hash, key }
-  loop 0, self.index(hash), entry {
-    i, idx, entry => {
+  loop (0, self.index(hash), entry) {
+    (i, idx, entry) => {
       if i == self.capacity {
         panic()
       }
@@ -77,10 +72,10 @@ pub fn[K : Hash + Eq] add(self : T[K], key : K) -> Unit {
           if entry.psl > curr_entry.psl {
             self.entries[idx] = Some(entry)
             curr_entry.psl += 1
-            continue i + 1, self.next_index(idx), curr_entry
+            continue (i + 1, self.next_index(idx), curr_entry)
           }
           entry.psl += 1
-          continue i + 1, self.next_index(idx), entry
+          continue (i + 1, self.next_index(idx), entry)
         }
       }
     }
@@ -148,7 +143,7 @@ pub fn[K] is_empty(self : T[K]) -> Bool {
 ///|
 /// Iterate over all keys of the set.
 pub fn[K] each(self : T[K], f : (K) -> Unit) -> Unit {
-  self.eachi(fn(_i, k) { f(k) })
+  self.eachi((_i, k) => f(k))
 }
 
 ///|
@@ -176,8 +171,8 @@ pub fn[K] clear(self : T[K]) -> Unit {
 /// Union of two hash sets.
 pub fn[K : Hash + Eq] union(self : T[K], other : T[K]) -> T[K] {
   let m = new()
-  self.each(fn(k) { m.add(k) })
-  other.each(fn(k) { m.add(k) })
+  self.each(k => m.add(k))
+  other.each(k => m.add(k))
   m
 }
 
@@ -185,7 +180,7 @@ pub fn[K : Hash + Eq] union(self : T[K], other : T[K]) -> T[K] {
 /// Intersection of two hash sets.
 pub fn[K : Hash + Eq] intersection(self : T[K], other : T[K]) -> T[K] {
   let m = new()
-  self.each(fn(k) { if other.contains(k) { m.add(k) } })
+  self.each(k => if other.contains(k) { m.add(k) })
   m
 }
 
@@ -193,7 +188,7 @@ pub fn[K : Hash + Eq] intersection(self : T[K], other : T[K]) -> T[K] {
 /// Difference of two hash sets.
 pub fn[K : Hash + Eq] difference(self : T[K], other : T[K]) -> T[K] {
   let m = new()
-  self.each(fn(k) { if not(other.contains(k)) { m.add(k) } })
+  self.each(k => if !other.contains(k) { m.add(k) })
   m
 }
 
@@ -201,8 +196,8 @@ pub fn[K : Hash + Eq] difference(self : T[K], other : T[K]) -> T[K] {
 /// Symmetric difference of two hash sets.
 pub fn[K : Hash + Eq] symmetric_difference(self : T[K], other : T[K]) -> T[K] {
   let m = new()
-  self.each(fn(k) { if not(other.contains(k)) { m.add(k) } })
-  other.each(fn(k) { if not(self.contains(k)) { m.add(k) } })
+  self.each(k => if !other.contains(k) { m.add(k) })
+  other.each(k => if !self.contains(k) { m.add(k) })
   m
 }
 
@@ -210,9 +205,9 @@ pub fn[K : Hash + Eq] symmetric_difference(self : T[K], other : T[K]) -> T[K] {
 /// Check if two sets have no common elements.
 pub fn[K : Hash + Eq] is_disjoint(self : T[K], other : T[K]) -> Bool {
   if self.size() <= other.size() {
-    self.iter().all(fn(k) { not(other.contains(k)) })
+    self.iter().all(k => !other.contains(k))
   } else {
-    other.iter().all(fn(k) { not(self.contains(k)) })
+    other.iter().all(k => !self.contains(k))
   }
 }
 
@@ -220,7 +215,7 @@ pub fn[K : Hash + Eq] is_disjoint(self : T[K], other : T[K]) -> Bool {
 /// Check if the current set is a subset of another set.
 pub fn[K : Hash + Eq] is_subset(self : T[K], other : T[K]) -> Bool {
   if self.size() <= other.size() {
-    self.iter().all(fn(k) { other.contains(k) })
+    self.iter().all(k => other.contains(k))
   } else {
     false
   }
@@ -258,21 +253,19 @@ pub impl[K : Hash + Eq] Sub for T[K] with op_sub(self, other) {
 
 ///|
 pub fn[K] iter(self : T[K]) -> Iter[K] {
-  Iter::new(fn(yield_) {
-    for entry in self.entries {
-      if entry is Some({ key, .. }) {
-        guard yield_(key) is IterContinue else { break IterEnd }
-      }
-    } else {
-      IterContinue
+  Iter::new(yield_ => for entry in self.entries {
+    if entry is Some({ key, .. }) {
+      guard yield_(key) is IterContinue else { break IterEnd }
     }
+  } else {
+    IterContinue
   })
 }
 
 ///|
 pub fn[K : Hash + Eq] from_iter(iter : Iter[K]) -> T[K] {
   let s = new()
-  iter.each(fn(e) { s.add(e) })
+  iter.each(e => s.add(e))
   s
 }
 
@@ -285,7 +278,7 @@ pub impl[X : @quickcheck.Arbitrary + Eq + Hash] @quickcheck.Arbitrary for T[X] w
 }
 
 ///|
-fn[K : Hash] shift_back(self : T[K], start_index : Int) -> Unit {
+fn[K] shift_back(self : T[K], start_index : Int) -> Unit {
   for i = 0, prev = start_index, curr = self.next_index(start_index)
       i < self.entries.length()
       i = i + 1, prev = curr, curr = self.next_index(curr) {
@@ -326,7 +319,7 @@ fn[K : Hash + Eq] grow(self : T[K]) -> Unit {
 }
 
 ///|
-fn[K : Hash] index(self : T[K], hash : Int) -> Int {
+fn[K] index(self : T[K], hash : Int) -> Int {
   abs(hash) & (self.capacity - 1)
 }
 
@@ -340,7 +333,7 @@ fn abs(n : Int) -> Int {
 }
 
 ///|
-fn[K : Hash] next_index(self : T[K], index : Int) -> Int {
+fn[K] next_index(self : T[K], index : Int) -> Int {
   (index + 1) & (self.capacity - 1)
 }
 
@@ -374,17 +367,20 @@ priv type MyString String derive(Eq)
 
 ///|
 impl Hash for MyString with hash(self) {
-  self._.length()
+  let MyString(self) = self
+  self.length()
 }
 
 ///|
 impl Hash for MyString with hash_combine(self, hasher) {
-  hasher.combine_string(self._)
+  let MyString(self) = self
+  hasher.combine_string(self)
 }
 
 ///|
 impl Show for MyString with output(self, logger) {
-  logger.write_string(self._)
+  let MyString(self) = self
+  logger.write_string(self)
 }
 
 ///|
@@ -397,7 +393,7 @@ test "set" {
   m.add("cd")
   m.add("c")
   m.add("d")
-  assert_eq(m.size, 7)
+  inspect(m.size, content="7")
   assert_eq(
     m.debug_entries(),
     "_,(0,a),(1,b),(2,c),(3,d),(3,bc),(4,cd),(4,abc),_,_,_,_,_,_,_,_",
@@ -418,8 +414,11 @@ test "remove" {
   m.add("abc" |> i)
   m.add("abcdef" |> i)
   m.remove("ab" |> i)
-  assert_eq(m.size(), 5)
-  assert_eq(m.debug_entries(), "_,(0,a),(0,bc),(1,cd),(1,abc),_,(0,abcdef),_")
+  inspect(m.size(), content="5")
+  inspect(
+    m.debug_entries(),
+    content="_,(0,a),(0,bc),(1,cd),(1,abc),_,(0,abcdef),_",
+  )
 }
 
 ///|
@@ -433,8 +432,8 @@ test "remove_unexist_key" {
   m.add("ab" |> i)
   m.add("abc" |> i)
   m.remove("d" |> i)
-  assert_eq(m.size(), 3)
-  assert_eq(m.debug_entries(), "_,(0,a),(0,ab),(0,abc),_,_,_,_")
+  inspect(m.size(), content="3")
+  inspect(m.debug_entries(), content="_,(0,a),(0,ab),(0,abc),_,_,_,_")
 }
 
 ///|
@@ -450,16 +449,16 @@ test "grow" {
   m.add("Java" |> i)
   m.add("Scala" |> i)
   m.add("Julia" |> i)
-  assert_eq(m.size, 6)
-  assert_eq(m.capacity, 8)
+  inspect(m.size, content="6")
+  inspect(m.capacity, content="8")
   m.add("Cobol" |> i)
-  assert_eq(m.size, 7)
-  assert_eq(m.capacity, 16)
+  inspect(m.size, content="7")
+  inspect(m.capacity, content="16")
   m.add("Python" |> i)
   m.add("Haskell" |> i)
   m.add("Rescript" |> i)
-  assert_eq(m.size, 10)
-  assert_eq(m.capacity, 16)
+  inspect(m.size, content="10")
+  inspect(m.capacity, content="16")
   assert_eq(
     m.debug_entries(),
     "_,(0,C),(0,Go),(0,C++),(0,Java),(0,Scala),(1,Julia),(2,Cobol),(2,Python),(2,Haskell),(2,Rescript),_,_,_,_,_",
@@ -470,8 +469,8 @@ test "grow" {
 test "clear" {
   let m : T[MyString] = new()
   m.clear()
-  assert_eq(m.size(), 0)
-  assert_eq(m.capacity(), 8)
+  inspect(m.size(), content="0")
+  inspect(m.capacity(), content="8")
   for i in 0..<m.capacity() {
     @test.same_object(m.entries[i], None)
   }
@@ -489,7 +488,7 @@ pub fn[K] to_array(self : T[K]) -> Array[K] {
   } else {
     []
   }
-  if not(res.is_empty()) {
+  if !res.is_empty() {
     let mut res_idx = 1
     while res_idx < res.length() && i < self.capacity {
       if self.entries[i] is Some({ key, .. }) {

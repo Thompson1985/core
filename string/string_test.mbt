@@ -83,10 +83,10 @@ test "chars" {
   let mut str = ""
   "A😊𠮷BA😊𠮷B"
   .iter()
-  .each(fn(c) { str = str + c.to_int().to_string() + "\n" })
+  .each(c => str = str + c.to_int().to_string() + "\n")
   inspect(
     str,
-    content=
+    content=(
       #|65
       #|128522
       #|134071
@@ -96,7 +96,7 @@ test "chars" {
       #|134071
       #|66
       #|
-    ,
+    ),
   )
   inspect(
     "A😊𠮷BA😊𠮷B".iter().take(2).collect(),
@@ -113,10 +113,10 @@ test "rev_iter" {
   let mut str = ""
   "A😊𠮷BA😊𠮷B"
   .rev_iter()
-  .each(fn(c) { str = str + c.to_int().to_string() + "\n" })
+  .each(c => str = str + c.to_int().to_string() + "\n")
   inspect(
     str,
-    content=
+    content=(
       #|66
       #|134071
       #|128522
@@ -126,7 +126,7 @@ test "rev_iter" {
       #|128522
       #|65
       #|
-    ,
+    ),
   )
   inspect(
     "A😊𠮷BA😊𠮷B".rev_iter().take(2).collect(),
@@ -143,10 +143,10 @@ test "iter2" {
   let mut str = ""
   "A😊𠮷BA😊𠮷B"
   .iter2()
-  .each(fn(i, c) { str = str + "\{i}: \{c.to_int()} \n" })
+  .each((i, c) => str = str + "\{i}: \{c.to_int()} \n")
   inspect(
     str,
-    content=
+    content=(
       #|0: 65 
       #|1: 128522 
       #|2: 134071 
@@ -156,11 +156,12 @@ test "iter2" {
       #|6: 134071 
       #|7: 66 
       #|
-    ,
+    ),
   )
 }
 
 // test here to avlid cyclic dependency between assertion and builtin
+
 ///|
 test "Buffer::to_bytes" {
   let buffer = StringBuilder::new(size_hint=16)
@@ -361,46 +362,46 @@ test "has_suffix" {
 test "split" {
   inspect(
     "a,b,c,d,e".split(","),
-    content=
+    content=(
       #|["a", "b", "c", "d", "e"]
-    ,
+    ),
   )
   inspect(
     "abcde".split(""),
-    content=
+    content=(
       #|["a", "b", "c", "d", "e"]
-    ,
+    ),
   )
   inspect(
     "a b c d e".split(" "),
-    content=
+    content=(
       #|["a", "b", "c", "d", "e"]
-    ,
+    ),
   )
   inspect(
     "abcde".split("x"),
-    content=
+    content=(
       #|["abcde"]
-    ,
+    ),
   )
   inspect("".split(""), content="[]")
   inspect(
     "".split("x"),
-    content=
+    content=(
       #|[""]
-    ,
+    ),
   )
   inspect(
     "你 wow 好 wow 月 wow 兔".split(" wow "),
-    content=
+    content=(
       #|["你", "好", "月", "兔"]
-    ,
+    ),
   )
   inspect(
     "👍😍😭👍😍😭👍😍😭👍".split("😍😭"),
-    content=
+    content=(
       #|["👍", "👍", "👍", "👍"]
-    ,
+    ),
   )
 }
 
@@ -466,72 +467,72 @@ test "to_upper" {
 test "split" {
   inspect(
     "a b c d e".split(" "),
-    content=
+    content=(
       #|["a", "b", "c", "d", "e"]
-    ,
+    ),
   )
   inspect(
     "abcde".split("x"),
-    content=
+    content=(
       #|["abcde"]
-    ,
+    ),
   )
   inspect("".split(""), content="[]")
   inspect(
     "".split("x"),
-    content=
+    content=(
       #|[""]
-    ,
+    ),
   )
   inspect(
     "你 wow 好 wow 月 wow 兔".split(" wow "),
-    content=
+    content=(
       #|["你", "好", "月", "兔"]
-    ,
+    ),
   )
   inspect(
     "👍😍😭👍😍😭👍😍😭👍".split("😍😭"),
-    content=
+    content=(
       #|["👍", "👍", "👍", "👍"]
-    ,
+    ),
   )
   // Additional test cases
   inspect(
     "a,b,c,d,e".split(","),
-    content=
+    content=(
       #|["a", "b", "c", "d", "e"]
-    ,
+    ),
   )
   inspect(
     "a,,b,,c".split(","),
-    content=
+    content=(
       #|["a", "", "b", "", "c"]
-    ,
+    ),
   )
   inspect(
     "a,,b,,c".split(",,"),
-    content=
+    content=(
       #|["a", "b", "c"]
-    ,
+    ),
   )
   inspect(
     "a b c d e".split(""),
-    content=
+    content=(
       #|["a", " ", "b", " ", "c", " ", "d", " ", "e"]
-    ,
+    ),
   )
   inspect(
     "a b c d e".split(" "),
-    content=
+    content=(
       #|["a", "b", "c", "d", "e"]
-    ,
+    ),
   )
 }
 
 ///|
 test "String::fold" {
   let s = "this is a long string"
-  inspect(s.fold(init=0, fn(acc, c) { acc + c.to_int() }), content="1980")
+  inspect(s.fold(init=0, (acc, c) => acc + c.to_int()), content="1980")
   inspect(
     s.fold(init=@list.empty(), _.prepend(_)).rev(),
     content="@list.of(['t', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 'l', 'o', 'n', 'g', ' ', 's', 't', 'r', 'i', 'n', 'g'])",

@@ -15,7 +15,7 @@ test "parse and validate jsons" {
   assert_true(@json.valid("false"))
 
   // Parse JSON string into Json value
-  let json = try @json.parse("{\"key\": 42}") catch {
+  let json = @json.parse("{\"key\": 42}") catch {
     (_ : ParseError) => panic()
     // _ => panic() // redundant, the type checker won't refine further
   }
@@ -23,11 +23,13 @@ test "parse and validate jsons" {
   // Pretty print with indentation
   inspect(
     json.stringify(indent=2),
-    content=
-      #|{
-      #|  "key": 42
-      #|}
-    ,
+    content={
+      let output =
+        #|{
+        #|  "key": 42
+        #|}
+      output
+    },
   )
 }
 ```
@@ -44,9 +46,9 @@ test "json object navigation" {
   let string_opt = json.value("string").unwrap().as_string()
   inspect(
     string_opt,
-    content=
+    content=(
       #|Some("hello")
-    ,
+    ),
   )
 
   // Access number
@@ -106,9 +108,9 @@ test "json decode" {
   let map : Map[String, Int] = @json.from_json(json_map)
   inspect(
     map,
-    content=
+    content=(
       #|{"a": 1, "b": 2}
-    ,
+    ),
   )
 }
 ```

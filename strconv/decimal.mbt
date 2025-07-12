@@ -13,22 +13,6 @@
 // limitations under the License.
 
 ///|
-/// High Precision Decimal structure for "Simple Decimal Conversion" algorithm.
-/// Developed by Ken. Thompson, Russ Cox, Robert Griesemer, Nigel Tao.
-/// 
-/// reference:
-/// - <https://nigeltao.github.io/blog/2020/parse-number-f64-simple.html>
-/// - <https://nigeltao.github.io/blog/2020/eisel-lemire.html>
-#deprecated("Decimal will be changed to private. Use `@strconv.parse_double` instead")
-struct Decimal {
-  digits : FixedArray[Byte]
-  mut digits_num : Int
-  mut decimal_point : Int
-  mut negative : Bool
-  mut truncated : Bool
-}
-
-///|
 /// Maximum shift that we can do in one pass without overflow.
 /// We have to be able to accommodate 9 << max_shift.
 let max_shift = 59
@@ -39,13 +23,6 @@ let max_shift = 59
 let powtab = [
   1, 3, 6, 9, 13, 16, 19, 23, 26, 29, 33, 36, 39, 43, 46, 49, 53, 56, 59,
 ]
-
-///|
-/// Create a zero decimal.
-#deprecated("Decimal will be changed to private. Use `@strconv.parse_double` instead")
-pub fn Decimal::new() -> Decimal {
-  Decimal::new_priv()
-}
 
 ///|
 fn Decimal::new_priv() -> Decimal {
@@ -59,13 +36,6 @@ fn Decimal::new_priv() -> Decimal {
 }
 
 ///|
-/// Create a decimal with an Int64 value.
-#deprecated("Decimal will be changed to private. Use `@strconv.parse_double` instead")
-pub fn Decimal::from_int64(v : Int64) -> Decimal {
-  Decimal::from_int64_priv(v)
-}
-
-///|
 fn Decimal::from_int64_priv(v : Int64) -> Decimal {
   let d = Decimal::new_priv()
   d.assign(v)
@@ -73,18 +43,12 @@ fn Decimal::from_int64_priv(v : Int64) -> Decimal {
 }
 
 ///|
-#deprecated("use `@strconv.parse_double` instead")
-pub fn parse_decimal(str : String) -> Decimal!StrConvError {
+fn parse_decimal_priv(str : String) -> Decimal raise StrConvError {
   parse_decimal_from_view(str.view())
 }
 
 ///|
-fn parse_decimal_priv(str : String) -> Decimal!StrConvError {
-  parse_decimal_from_view(str.view())
-}
-
-///|
-fn parse_decimal_from_view(str : @string.View) -> Decimal!StrConvError {
+fn parse_decimal_from_view(str : @string.View) -> Decimal raise StrConvError {
   let d = Decimal::new_priv()
   let mut has_dp = false
   let mut has_digits = false
@@ -101,7 +65,7 @@ fn parse_decimal_from_view(str : @string.View) -> Decimal!StrConvError {
   let rest = loop rest {
     ['_', .. rest] => continue rest
     ['.', .. rest] => {
-      guard not(has_dp) else { syntax_err() }
+      guard !has_dp else { syntax_err() }
       has_dp = true
       d.decimal_point = d.digits_num
       continue rest
@@ -124,7 +88,7 @@ fn parse_decimal_from_view(str : @string.View) -> Decimal!StrConvError {
     rest => rest
   }
   guard has_digits else { syntax_err() }
-  if not(has_dp) {
+  if !has_dp {
     d.decimal_point = d.digits_num
   }
   // read exponent part
@@ -161,20 +125,7 @@ fn parse_decimal_from_view(str : @string.View) -> Decimal!StrConvError {
 }
 
 ///|
-#deprecated("use `@strconv.parse_double` instead")
-pub fn Decimal::parse_decimal(str : String) -> Decimal!StrConvError {
-  parse_decimal_from_view(str.view())
-}
-
-///|
-/// Convert the decimal to Double.
-#deprecated("use `@strconv.parse_double` instead to avoid using this method.")
-pub fn to_double(self : Decimal) -> Double!StrConvError {
-  self.to_double_priv()
-}
-
-///|
-fn to_double_priv(self : Decimal) -> Double!StrConvError {
+fn to_double_priv(self : Decimal) -> Double raise StrConvError {
   let mut exponent = 0
   let mut mantissa = 0L
   // check the underflow and overflow
@@ -238,7 +189,7 @@ fn to_double_priv(self : Decimal) -> Double!StrConvError {
   mantissa = self.rounded_integer()
 
   // rounding might have added a bit, shift down.
-  if mantissa == (2L << double_info.mantissa_bits) {
+  if mantissa == 2L << double_info.mantissa_bits {
     mantissa = mantissa << 1
     exponent += 1
     if exponent - double_info.bias >= (1 << double_info.exponent_bits) - 1 {
@@ -255,14 +206,6 @@ fn to_double_priv(self : Decimal) -> Double!StrConvError {
   // combining the 52 mantissa bits with the 11 exponent bits and 1 sign bit
   let bits = assemble_bits(mantissa, exponent, self.negative)
   bits.reinterpret_as_double()
-}
-
-///|
-/// Binary shift left (s > 0) or right (s < 0).
-/// The shift count must not larger than the max_shift to avoid overflow.
-#deprecated("use `@strconv.parse_double` instead to avoid using this method.")
-pub fn shift(self : Decimal, s : Int) -> Unit {
-  self.shift_priv(s)
 }
 
 ///|
@@ -378,9 +321,9 @@ fn right_shift(self : Decimal, s : Int) -> Unit {
 
   // read enough leading digits to start a shift
   let mut acc = 0UL
-  while (acc >> s) == 0 {
+  while acc >> s == 0 {
     if read_index >= self.digits_num {
-      while (acc >> s) == 0 {
+      while acc >> s == 0 {
         acc *= 10
         read_index += 1
       }
@@ -619,43 +562,37 @@ fn Decimal::to_string(self : Decimal) -> String {
 ///|
 test "new" {
   let hpd = Decimal::from_int64_priv(1L)
-  assert_eq(hpd.digits.length(), 800)
-  assert_eq(hpd.digits_num, 1)
-  assert_eq(hpd.decimal_point, 1)
-  assert_eq(hpd.negative, false)
-  assert_eq(hpd.truncated, false)
+  inspect(hpd.digits.length(), content="800")
+  inspect(hpd.digits_num, content="1")
+  inspect(hpd.decimal_point, content="1")
+  inspect(hpd.negative, content="false")
+  inspect(hpd.truncated, content="false")
 }
 
 ///|
 test "from_int64" {
   let hpd = Decimal::from_int64_priv(123456789L)
-  assert_eq(hpd.to_string(), "123456789")
+  inspect(hpd.to_string(), content="123456789")
 }
 
 ///|
 test "parse_decimal" {
   let s = "0.0000000000000000000000000000007888609052210118054117285652827862296732064351090230047702789306640625"
-  let hpd = try parse_decimal_priv(s) catch {
-    _ => panic()
-  }
-  assert_eq(hpd.to_string(), s)
-  let hpd = try parse_decimal_priv("1.0e-10") catch {
-    _ => panic()
-  }
-  assert_eq(hpd.to_string(), "0.0000000001")
+  assert_eq(parse_decimal_priv(s).to_string(), s)
+  assert_eq(parse_decimal_priv("1.0e-10").to_string(), "0.0000000001")
 }
 
 ///|
 test "to_string" {
   let hpd = Decimal::from_int64_priv(123456789L)
   hpd.decimal_point = 1
-  assert_eq(hpd.to_string(), "1.23456789")
+  inspect(hpd.to_string(), content="1.23456789")
   hpd.decimal_point = 0
-  assert_eq(hpd.to_string(), "0.123456789")
+  inspect(hpd.to_string(), content="0.123456789")
   hpd.decimal_point = -1
-  assert_eq(hpd.to_string(), "0.0123456789")
+  inspect(hpd.to_string(), content="0.0123456789")
   hpd.decimal_point = 10
-  assert_eq(hpd.to_string(), "1234567890")
+  inspect(hpd.to_string(), content="1234567890")
 }
 
 ///|
@@ -698,14 +635,8 @@ test "parse decimal error" {
 
 ///|
 test "parse decimal with large numbers" {
-  let mut s = ""
-  for i in 0..<100 {
-    s += "9"
-  }
-  inspect(
-    parse_decimal_priv(s),
-    content="9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
-  )
+  let s = String::make(100, '9')
+  inspect(parse_decimal_priv(s), content=s)
 }
 
 ///|
@@ -719,14 +650,8 @@ test "should_round_up when truncated and half-way" {
 ///|
 test "parse_decimal with large numbers and truncation" {
   // Construct a very large number to trigger truncation
-  let mut s = "1"
-  for i in 0..<1000 {
-    s += "0"
-  }
-  inspect(
-    parse_decimal_priv(s),
-    content="10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  )
+  let s = String::make(1000, '9')
+  inspect(parse_decimal_priv(s), content=String::make(800, '9'))
 }
 
 ///|

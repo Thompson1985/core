@@ -24,10 +24,8 @@
 /// Example:
 ///
 /// ```moonbit
-/// test "to_int" {
 ///   inspect(true.to_int(), content="1")
 ///   inspect(false.to_int(), content="0")
-/// }
 /// ```
 pub fn to_int(self : Bool) -> Int {
   if self {
@@ -50,10 +48,8 @@ pub fn to_int(self : Bool) -> Int {
 /// Example:
 ///
 /// ```moonbit
-/// test "to_int64" {
 ///   inspect(true.to_int64(), content="1")
 ///   inspect(false.to_int64(), content="0")
-/// }
 /// ```
 pub fn to_int64(self : Bool) -> Int64 {
   if self {
@@ -76,10 +72,8 @@ pub fn to_int64(self : Bool) -> Int64 {
 /// Example:
 ///
 /// ```moonbit
-/// test "to_uint" {
 ///   inspect(true.to_uint(), content="1")
 ///   inspect(false.to_uint(), content="0")
-/// }
 /// ```
 pub fn to_uint(self : Bool) -> UInt {
   if self {
@@ -102,10 +96,8 @@ pub fn to_uint(self : Bool) -> UInt {
 /// Example:
 ///
 /// ```moonbit
-/// test "to_uint64" {
 ///   inspect(true.to_uint64(), content="1")
 ///   inspect(false.to_uint64(), content="0")
-/// }
 /// ```
 pub fn to_uint64(self : Bool) -> UInt64 {
   if self {
@@ -123,4 +115,54 @@ pub impl Hash for Bool with hash(self) {
 ///|
 pub impl Hash for Bool with hash_combine(self, hasher) {
   hasher.combine_bool(self)
+}
+
+///|
+/// Converts a boolean value to an unsigned 16-bit integer.
+///
+/// Parameters:
+///
+/// * `self` : The boolean value to be converted.
+///
+/// Returns an unsigned 16-bit integer, where `true` is converted to 1 and
+/// `false` is converted to 0.
+///
+/// Example:
+///
+/// ```moonbit
+/// inspect(true.to_uint16(), content="1")
+/// inspect(false.to_uint16(), content="0")
+/// ```
+///
+pub fn to_uint16(self : Bool) -> UInt16 {
+  if self {
+    1
+  } else {
+    0
+  }
+}
+
+///|
+/// Converts a boolean value to a 16-bit integer representation.
+///
+/// Parameters:
+///
+/// * `self` : The boolean value to be converted.
+///
+/// Returns a 16-bit integer, where `true` is converted to 1 and `false` is
+/// converted to 0.
+///
+/// Example:
+///
+/// ```moonbit
+/// inspect(true.to_int16(), content="1")
+/// inspect(false.to_int16(), content="0")
+/// ```
+///
+pub fn to_int16(self : Bool) -> Int16 {
+  if self {
+    1
+  } else {
+    0
+  }
 }

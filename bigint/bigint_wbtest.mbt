@@ -551,6 +551,11 @@ test "to_hex" {
     a.to_hex(),
     content="-11E3444DC1F35F057AD2CBC2791737468140A426FAC3CBA7AF8C92A8F34E",
   )
+
+  // Test to_hex where limbs is zero in the middle
+  let a = BigInt::from_hex("1000000000000000000000000")
+  check_invariant(a)
+  inspect(a.to_hex(), content="1000000000000000000000000")
 }
 
 ///|
@@ -643,9 +648,9 @@ test "to_octets" {
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x00"
-    ,
+    ),
   )
 
   // Test positive number
@@ -653,9 +658,9 @@ test "to_octets" {
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x0f"
-    ,
+    ),
   )
 
   // Test positive number with leading zero
@@ -663,9 +668,9 @@ test "to_octets" {
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x10"
-    ,
+    ),
   )
 
   // Test large positive number
@@ -673,9 +678,9 @@ test "to_octets" {
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x01\x23\x45\x67\x89\x01\x23\x45\x67\x89"
-    ,
+    ),
   )
 
   // Check padding
@@ -683,9 +688,9 @@ test "to_octets" {
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x10\x00\x00"
-    ,
+    ),
   )
 
   // Test very large positive number
@@ -693,25 +698,25 @@ test "to_octets" {
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x11\xe3\x44\x4d\xc1\xf3\x5f\x05\x7a\xd2\xcb\xc2\x79\x17\x37\x46\x81\x40\xa4\x26\xfa\xc3\xcb\xa7\xaf\x8c\x92\xa8\xf3\x4e"
-    ,
+    ),
   )
   let a = 0x123456789012345678123456789012345678123456789012345678123456789012345678N
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x12\x34\x56\x78\x90\x12\x34\x56\x78\x12\x34\x56\x78\x90\x12\x34\x56\x78\x12\x34\x56\x78\x90\x12\x34\x56\x78\x12\x34\x56\x78\x90\x12\x34\x56\x78"
-    ,
+    ),
   )
   let a = 0x805146F2F58580962A0A2E6134BC75E25AD97AE3D09CD34BA4F629AB8911F3F5CB8573A62EDD16B0D46775A415F545A75518DA3439914D9CAA26449067D85E704E8FCF9B29182485B41F952616BACDFDDF52B413B524D0EB743E8264A9C6AE32D12C3D20C5B81189060F4AC5D216713D503A69644EA8E4EA220A720C41F6B3D18BED65B4238318E6B0A41D8540D756865EC92DF40E8D365A230F17DF1D0A440BC6A557CD46D00B10D74C0E75500B2ADB3A0336223F9285B78CD04F485E417E1DB562B9EFCF79433209E6D6E2F43A484E471DE4F1F5AE38E08E7DAEB644C2C0A22697DD6D29BE0B40FF50DB575FEF02FA5525953C7C198B4A3600BA8CE1F917852A4B957151189F09DCDFCB79963E7D850127858A97855B94870ACCBE8203E73FE79791EE6EA1B1282A0CEAC54D6F6B7CD6C7B8D8092E949FF0A84N
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x08\x05\x14\x6f\x2f\x58\x58\x09\x62\xa0\xa2\xe6\x13\x4b\xc7\x5e\x25\xad\x97\xae\x3d\x09\xcd\x34\xba\x4f\x62\x9a\xb8\x91\x1f\x3f\x5c\xb8\x57\x3a\x62\xed\xd1\x6b\x0d\x46\x77\x5a\x41\x5f\x54\x5a\x75\x51\x8d\xa3\x43\x99\x14\xd9\xca\xa2\x64\x49\x06\x7d\x85\xe7\x04\xe8\xfc\xf9\xb2\x91\x82\x48\x5b\x41\xf9\x52\x61\x6b\xac\xdf\xdd\xf5\x2b\x41\x3b\x52\x4d\x0e\xb7\x43\xe8\x26\x4a\x9c\x6a\xe3\x2d\x12\xc3\xd2\x0c\x5b\x81\x18\x90\x60\xf4\xac\x5d\x21\x67\x13\xd5\x03\xa6\x96\x44\xea\x8e\x4e\xa2\x20\xa7\x20\xc4\x1f\x6b\x3d\x18\xbe\xd6\x5b\x42\x38\x31\x8e\x6b\x0a\x41\xd8\x54\x0d\x75\x68\x65\xec\x92\xdf\x40\xe8\xd3\x65\xa2\x30\xf1\x7d\xf1\xd0\xa4\x40\xbc\x6a\x55\x7c\xd4\x6d\x00\xb1\x0d\x74\xc0\xe7\x55\x00\xb2\xad\xb3\xa0\x33\x62\x23\xf9\x28\x5b\x78\xcd\x04\xf4\x85\xe4\x17\xe1\xdb\x56\x2b\x9e\xfc\xf7\x94\x33\x20\x9e\x6d\x6e\x2f\x43\xa4\x84\xe4\x71\xde\x4f\x1f\x5a\xe3\x8e\x08\xe7\xda\xeb\x64\x4c\x2c\x0a\x22\x69\x7d\xd6\xd2\x9b\xe0\xb4\x0f\xf5\x0d\xb5\x75\xfe\xf0\x2f\xa5\x52\x59\x53\xc7\xc1\x98\xb4\xa3\x60\x0b\xa8\xce\x1f\x91\x78\x52\xa4\xb9\x57\x15\x11\x89\xf0\x9d\xcd\xfc\xb7\x99\x63\xe7\xd8\x50\x12\x78\x58\xa9\x78\x55\xb9\x48\x70\xac\xcb\xe8\x20\x3e\x73\xfe\x79\x79\x1e\xe6\xea\x1b\x12\x82\xa0\xce\xac\x54\xd6\xf6\xb7\xcd\x6c\x7b\x8d\x80\x92\xe9\x49\xff\x0a\x84"
-    ,
+    ),
   )
 }
 
@@ -721,24 +726,24 @@ test "to_octets with padding" {
   let a = zero
   inspect(
     a.to_octets(length=4),
-    content=
+    content=(
       #|b"\x00\x00\x00\x00"
-    ,
+    ),
   )
   // some random number
   let a = 0x10000N
   check_invariant(a)
   inspect(
     a.to_octets(),
-    content=
+    content=(
       #|b"\x01\x00\x00"
-    ,
+    ),
   )
   inspect(
     a.to_octets(length=4),
-    content=
+    content=(
       #|b"\x00\x01\x00\x00"
-    ,
+    ),
   )
 }
 
@@ -751,4 +756,42 @@ test "pow" {
     2790N.pow(413),
     content="10827693458027068918752254513689369927451498632867702850871449492721716762882046359646654407147290095143376244612860740505063304616869045757879636651922242895944635094287526023557872050108996014618928707382416906723717536207944990935946477343103732942220495426003253324856391048675505527041527544249845903325107575822015010197006079682477544271998209608154757421132764034059289159228295810448568286783859864141487725512980856505994152145510660350938086763233208252511256291934375881870590480237727775536326670654123168787472077359939510018827829233028430183558108518520524567765780717109616748933630364200317687291046055118737587697510939517252245710306646155772831436013971724481443654932630319085588147436112198934867224850036968074130558127066188475740553149587714112808551835880666012903651859580234129805580074844684526620091506655345299434455806896837926335229779632528684030400890708579038639280240022309690038032176604539091205540422068492362106868171343650410145963283813864374487990607671475570427243900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
   )
+}
+
+///|
+test "BigInt::limbs" {
+  // Test zero
+  inspect(0N.limbs(), content="[0]")
+  assert_eq(0N.limbs().to_array(), (-0N).limbs().to_array())
+
+  // Positive and negative of same magnitude should have same limbs
+  assert_eq(1N.limbs().to_array(), (-1N).limbs().to_array())
+
+  // Test small positive numbers
+  inspect(42N.limbs(), content="[42]")
+
+  // Test small negative numbers
+  inspect((-42N).limbs(), content="[42]")
+
+  // Test larger numbers
+  let large = 123456789N
+  inspect(large.limbs(), content="[123456789]")
+  assert_eq(large.limbs().to_array(), (-large).limbs().to_array())
+
+  // Test very large numbers (multi-limb)
+  let very_large = 12345678901234567890123456789N
+  inspect(very_large.limbs(), content="[1849262357, 1186908593, 669260594]")
+  inspect((-very_large).limbs(), content="[1849262357, 1186908593, 669260594]")
+  assert_eq(very_large.limbs().to_array(), (-very_large).limbs().to_array())
+
+  // Test that equal BigInts have equal limbs
+  let a = 987654321098765432N
+  let b = BigInt::from_string("00987654321098765432")
+  inspect(a.limbs(), content="[1241035896, 229956191]")
+  assert_eq(a.limbs().to_array(), b.limbs().to_array())
+
+  // Test that different BigInts have different limbs
+  let c = a + 1N
+  inspect(c.limbs(), content="[1241035897, 229956191]")
+  assert_not_eq(a.limbs().to_array(), c.limbs().to_array())
 }

@@ -39,10 +39,10 @@ test "to_array" {
 test "as_iter" {
   let buf = StringBuilder::new(size_hint=20)
   let v = @priority_queue.of([1, 2, 3])
-  v.iter().each(fn(e) { buf.write_string("[\{e}]") })
+  v.iter().each(e => buf.write_string("[\{e}]"))
   inspect(buf, content="[3][2][1]")
   buf.reset()
-  v.iter().take(2).each(fn(e) { buf.write_string("[\{e}]") })
+  v.iter().take(2).each(e => buf.write_string("[\{e}]"))
   inspect(buf, content="[3][2]")
 }
 
@@ -177,13 +177,13 @@ test "complex" {
   for i in 0..=1000 {
     pq = pq.push(arr[i])
   }
-  assert_eq(pq.length(), 1001)
+  inspect(pq.length(), content="1001")
   for i in 0..=1000 {
     assert_eq(pq.peek(), Some(1000 - i))
     pq = pq.pop().unwrap()
   }
   inspect(pq.iter(), content="[]")
-  assert_eq(pq.length(), 0)
+  inspect(pq.length(), content="0")
 }
 
 ///|
@@ -192,11 +192,11 @@ test "compare" {
   let pq2 = @priority_queue.of([1, 2, 4])
   let pq3 = @priority_queue.of([1, 2])
   let empty : @priority_queue.T[Int] = @priority_queue.new()
-  assert_eq(pq1.compare(pq2), -1)
-  assert_eq(pq1.compare(pq3), 1)
-  assert_eq(pq3.compare(pq1), -1)
-  assert_eq(pq1.compare(pq1), 0)
-  assert_eq(empty.compare(empty), 0)
+  inspect(pq1.compare(pq2), content="-1")
+  inspect(pq1.compare(pq3), content="1")
+  inspect(pq3.compare(pq1), content="-1")
+  inspect(pq1.compare(pq1), content="0")
+  inspect(empty.compare(empty), content="0")
 }
 
 ///|

@@ -19,10 +19,10 @@
 ///
 /// # Example
 ///
-/// ```
-/// let arr = [5, 4, 3, 2, 1]
-/// arr.sort()
-/// assert_eq(arr, [1, 2, 3, 4, 5])
+/// ```mbt
+///   let arr = [5, 4, 3, 2, 1]
+///   arr.sort()
+///   assert_eq(arr, [1, 2, 3, 4, 5])
 /// ```
 pub fn[T : Compare] sort(self : Array[T]) -> Unit {
   let len = self.length()
@@ -61,7 +61,7 @@ fn[T : Compare] quick_sort(arr : ArrayView[T], pred : T?, limit : Int) -> Unit {
     let (pivot, partitioned) = partition(arr, pivot_index)
     was_partitioned = partitioned
     balanced = minimum(pivot, len - pivot) >= len / 8
-    if not(balanced) {
+    if !balanced {
       limit -= 1
     }
     if pred is Some(pred) {
@@ -116,7 +116,7 @@ fn[T : Compare] try_bubble_sort(arr : ArrayView[T]) -> Bool {
       sorted = false
       arr.swap(j, j - 1)
     }
-    if not(sorted) {
+    if !sorted {
       tries += 1
       if tries > max_tries {
         return false
@@ -170,19 +170,15 @@ fn[T : Compare] choose_pivot(arr : ArrayView[T]) -> (Int, Bool) {
   if len >= 8 {
     let a = len / 4 * 1
     let c = len / 4 * 3
-    fn sort_2(a : Int, b : Int) {
-      if arr[a] > arr[b] {
-        arr.swap(a, b)
-        swaps += 1
-      }
+    let sort_2 = (a : Int, b : Int) => if arr[a] > arr[b] {
+      arr.swap(a, b)
+      swaps += 1
     }
-
-    fn sort_3(a : Int, b : Int, c : Int) {
+    let sort_3 = (a : Int, b : Int, c : Int) => {
       sort_2(a, b)
       sort_2(b, c)
       sort_2(a, b)
     }
-
     if len > use_median_of_medians {
       sort_3(a - 1, a, a + 1)
       sort_3(b - 1, b, b + 1)
@@ -229,7 +225,7 @@ fn[T : Compare] sift_down(arr : ArrayView[T], index : Int) -> Unit {
 }
 
 ///|
-fn test_sort(f : (Array[Int]) -> Unit) -> Unit! {
+fn test_sort(f : (Array[Int]) -> Unit) -> Unit raise {
   let arr = [5, 4, 3, 2, 1]
   f(arr)
   assert_eq(arr, [1, 2, 3, 4, 5])
@@ -258,23 +254,23 @@ fn test_sort(f : (Array[Int]) -> Unit) -> Unit! {
 test "try_bubble_sort" {
   let arr = [8, 7, 6, 5, 4, 3, 2, 1]
   let sorted = try_bubble_sort(arr[0:8])
-  assert_eq(sorted, true)
+  inspect(sorted, content="true")
   assert_eq(arr, [1, 2, 3, 4, 5, 6, 7, 8])
 }
 
 ///|
 test "heap_sort" {
-  test_sort(fn(arr) { heap_sort(arr[:]) })
+  test_sort(arr => heap_sort(arr[:]))
 }
 
 ///|
 test "insertion_sort" {
-  test_sort(fn(arr) { ArrayView::insertion_sort(arr[:]) })
+  test_sort(arr => ArrayView::insertion_sort(arr[:]))
 }
 
 ///|
 test "sort" {
-  test_sort(fn(arr) { arr.sort() })
+  test_sort(arr => arr.sort())
 }
 
 ///|

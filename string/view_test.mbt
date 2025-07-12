@@ -69,14 +69,14 @@ test "stringview rev_get" {
 test "stringview data" {
   let str = "Hello🤣🤣🤣"
   let view = str.view(start_offset=1, end_offset=7)
-  inspect!(view.data(), content="Hello🤣🤣🤣")
+  inspect(view.data(), content="Hello🤣🤣🤣")
 }
 
 ///|
 test "stringview start_offset" {
   let str = "Hello🤣🤣🤣"
   let view = str.view(start_offset=1, end_offset=7)
-  inspect!(view.start_offset(), content="1")
+  inspect(view.start_offset(), content="1")
 }
 
 ///|
@@ -667,9 +667,9 @@ test "to_json" {
   let v = "hello".view(start_offset=1, end_offset=4)
   inspect(
     v.to_json(),
-    content=
+    content=(
       #|String("ell")
-    ,
+    ),
   )
 }
 

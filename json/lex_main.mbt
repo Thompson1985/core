@@ -28,7 +28,7 @@ let non_ascii_whitespace : CharClass = CharClass::of([
 fn ParseContext::lex_value(
   ctx : ParseContext,
   allow_rbracket~ : Bool
-) -> Token!ParseError {
+) -> Token raise ParseError {
   for {
     match ctx.read_char() {
       Some('\t' | ' ' | '\n' | '\r') => continue
@@ -62,25 +62,25 @@ fn ParseContext::lex_value(
       Some('-') =>
         match ctx.read_char() {
           Some('0') => {
-            let n = ctx.lex_zero(start=ctx.offset - 2)
-            return Number(n)
+            let (n, repr) = ctx.lex_zero(start=ctx.offset - 2)
+            return Number(n, repr)
           }
           Some(c2) => {
             if c2 is ('1'..='9') {
-              let n = ctx.lex_decimal_integer(start=ctx.offset - 2)
-              return Number(n)
+              let (n, repr) = ctx.lex_decimal_integer(start=ctx.offset - 2)
+              return Number(n, repr)
             }
             ctx.invalid_char(shift=-1)
           }
           None => raise InvalidEof
         }
       Some('0') => {
-        let n = ctx.lex_zero(start=ctx.offset - 1)
-        return Number(n)
+        let (n, repr) = ctx.lex_zero(start=ctx.offset - 1)
+        return Number(n, repr)
       }
       Some('1'..='9') => {
-        let n = ctx.lex_decimal_integer(start=ctx.offset - 1)
-        return Number(n)
+        let (n, repr) = ctx.lex_decimal_integer(start=ctx.offset - 1)
+        return Number(n, repr)
       }
       Some('"') => {
         let s = ctx.lex_string()

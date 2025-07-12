@@ -21,9 +21,9 @@ test "bytes literal" {
   let b : Bytes = "你好"
   inspect(
     b + "utf8" + HELLO,
-    content=
+    content=(
       #|b"\xe4\xbd\xa0\xe5\xa5\xbd\x75\x74\x66\x38\xe4\xbd\xa0\xe5\xa5\xbd"
-    ,
+    ),
   )
   // match ("你好,utf8" : Bytes) {
   //   // [_,_,_, .. rest] => inspect(rest, content="utf8")
@@ -32,9 +32,9 @@ test "bytes literal" {
   // }
   inspect(
     b"\x41\x42\x43",
-    content=
+    content=(
       #|b"\x41\x42\x43"
-    ,
+    ),
   )
 }
 
@@ -43,9 +43,9 @@ test "from_array" {
   let b = @bytes.of([b'\x41', b'\x00', b'\x42', b'\x00', b'\x43', b'\x00'])
   inspect(
     b,
-    content=
+    content=(
       #|b"\x41\x00\x42\x00\x43\x00"
-    ,
+    ),
   )
 }
 
@@ -54,9 +54,9 @@ test "from_array literal" {
   let b = @bytes.of([65, 0, 66, 0, 67, 0])
   inspect(
     b,
-    content=
+    content=(
       #|b"\x41\x00\x42\x00\x43\x00"
-    ,
+    ),
   )
 }
 
@@ -124,10 +124,10 @@ test "from_iter empty iterator" {
 ///|
 test "iter" {
   let buf = StringBuilder::new(size_hint=5)
-  b"abcde".iter().each(fn { x => buf.write_string(x.to_string()) })
+  b"abcde".iter().each(x => buf.write_string(x.to_string()))
   inspect(buf, content="b'\\x61'b'\\x62'b'\\x63'b'\\x64'b'\\x65'")
   buf.reset()
-  b"abcde".iter().take(2).each(fn { x => buf.write_string(x.to_string()) })
+  b"abcde".iter().take(2).each(x => buf.write_string(x.to_string()))
   inspect(buf, content="b'\\x61'b'\\x62'")
 }
 
@@ -137,7 +137,7 @@ test "iter2" {
   let keys = []
   b"abcde"
   .iter2()
-  .each(fn(i, x) {
+  .each((i, x) => {
     buf.write_string(x.to_string())
     keys.push(i)
   })
@@ -180,9 +180,9 @@ test "Bytes::of with different byte values" {
   let bytes = Bytes::of(arr)
   inspect(
     bytes,
-    content=
+    content=(
       #|b"\x61\x62\x63"
-    ,
+    ),
   )
 }
 
@@ -192,9 +192,9 @@ test "Bytes::from_iter with multiple elements" {
   let bytes = Bytes::from_iter(iter)
   inspect(
     bytes,
-    content=
+    content=(
       #|b"\x61\x62\x63"
-    ,
+    ),
   )
 }
 
@@ -244,4 +244,14 @@ test "Bytes::get out of bounds" {
   let bytes = b"\x01\x02\x03"
   let byte = bytes.get(3)
   inspect(byte, content="None")
+}
+
+///|
+test "using regex" {
+  match "hell123o" using regex {
+    ["hell[0-9]+" as x, .. rest] => {
+      guard x is "hell123" && rest is "o" else { fail("Regex match failed") }
+    }
+    _ => fail("impossible")
+  }
 }
