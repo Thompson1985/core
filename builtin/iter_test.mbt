@@ -360,6 +360,37 @@ test "concat" {
 }
 
 ///|
+test "zip" {
+  let numbers = (1).until(6)
+  let letters = ["a", "b", "c"].iter()
+  inspect(
+    numbers.zip(letters).collect(),
+    content="[(1, \"a\"), (2, \"b\"), (3, \"c\")]",
+  )
+}
+
+///|
+test "zip alias combine" {
+  let numbers = (1).until(4)
+  let letters = ["x", "y", "z", "w"].iter()
+  inspect(
+    numbers.combine(letters).collect(),
+    content="[(1, \"x\"), (2, \"y\"), (3, \"z\")]",
+  )
+}
+
+///|
+test "zip short-circuits when either side ends" {
+  let lhs_evaluated = []
+  let rhs_evaluated = []
+  let lhs = (1).until(10).tap(x => lhs_evaluated.push(x))
+  let rhs = [10, 20].iter().tap(x => rhs_evaluated.push(x))
+  inspect(lhs.zip(rhs).collect(), content="[(1, 10), (2, 20)]")
+  inspect(lhs_evaluated, content="[1, 2, 3]")
+  inspect(rhs_evaluated, content="[10, 20]")
+}
+
+///|
 test "collect" {
   let arr = ['1', '2', '3', '4', '5']
   let iter = arr.iter()
@@ -378,31 +409,31 @@ test "until" {
   inspect(0L.until(10, step=0), content="[]")
   // inclusive
   inspect(
-    (@int.max_value - 2).until(@int.max_value - 1),
+    (@int.MAX_VALUE - 2).until(@int.MAX_VALUE - 1),
     content="[2147483645]",
   )
   inspect(
-    (@int.max_value - 2).until(@int.max_value - 1, inclusive=true),
+    (@int.MAX_VALUE - 2).until(@int.MAX_VALUE - 1, inclusive=true),
     content="[2147483645, 2147483646]",
   )
-  inspect((@int.max_value - 1).until(@int.max_value), content="[2147483646]")
+  inspect((@int.MAX_VALUE - 1).until(@int.MAX_VALUE), content="[2147483646]")
   inspect(
-    (@int.max_value - 1)
-    .until(@int.max_value, inclusive=true)
+    (@int.MAX_VALUE - 1)
+    .until(@int.MAX_VALUE, inclusive=true)
     .concat([0].iter()),
     content="[2147483646, 2147483647, 0]",
   )
-  inspect((@int.max_value - 1).until(@int.max_value), content="[2147483646]")
+  inspect((@int.MAX_VALUE - 1).until(@int.MAX_VALUE), content="[2147483646]")
   inspect(
-    (@int.max_value - 1).until(@int.max_value, inclusive=true),
+    (@int.MAX_VALUE - 1).until(@int.MAX_VALUE, inclusive=true),
     content="[2147483646, 2147483647]",
   )
   inspect(
-    (@int64.max_value - 2).until(@int64.max_value - 1L, inclusive=true),
+    (@int64.MAX_VALUE - 2).until(@int64.MAX_VALUE - 1L, inclusive=true),
     content="[9223372036854775805, 9223372036854775806]",
   )
   inspect(
-    (@int64.max_value - 1).until(@int64.max_value, inclusive=true),
+    (@int64.MAX_VALUE - 1).until(@int64.MAX_VALUE, inclusive=true),
     content="[9223372036854775806, 9223372036854775807]",
   )
   inspect(

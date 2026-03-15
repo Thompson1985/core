@@ -25,8 +25,8 @@ fn Float::to_unchecked_int(self : Float) -> Int = "%f32.to_i32"
 ///
 /// Returns an integer representation of the float value. Specifically:
 /// * `0` for `@float.not_a_number` (NaN),
-/// * `@int.max_value` (2147483647) for values greater than `@int.max_value`,
-/// * `@int.min_value` (-2147483648) for values less than `@int.min_value`.
+/// * `@int.MAX_VALUE` (2147483647) for values greater than `@int.MAX_VALUE`,
+/// * `@int.MIN_VALUE` (-2147483648) for values less than `@int.MIN_VALUE`.
 /// * truncated (towards zero) integer value for other cases.
 ///
 /// Examples:
