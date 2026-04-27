@@ -260,6 +260,12 @@ pub impl Show for Repr with output(self, logger) {
 }
 
 ///|
+/// `Repr` is its own debug representation: `to_repr` is the identity.
+pub impl Debug for Repr with to_repr(self) {
+  self
+}
+
+///|
 /// Print a value in human-readable format to standard output.
 pub fn[T : Debug] debug(x : T) -> Unit {
   println(render(x.to_repr()))
