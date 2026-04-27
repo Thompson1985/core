@@ -13,11 +13,14 @@
 // limitations under the License.
 
 ///|
+using @debug {trait Debug, type Repr}
+
+///|
 /// Error type `StrConvError`.
 #deprecated("use `@string` parsing APIs instead", skip_current_package=true)
 pub(all) suberror StrConvError {
   StrConvError(String)
-}
+} derive(@debug.Debug)
 
 ///|
 pub impl Show for StrConvError with output(self, logger) {
